@@ -2,6 +2,8 @@ const router = require("express").Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
+const { sendOtp, checkOtp } = require("../controllers/mobileAuth.controller");
+
 // google
 router.get(
   "/google",
@@ -21,7 +23,6 @@ router.get(
       {
         expiresIn: "12h",
         id: req.user.id,
-        email: req.user.email,
       },
       process.env.JWT_SECRET
     );
@@ -51,7 +52,6 @@ router.get(
       {
         expiresIn: "12h",
         id: req.user.id,
-        email: req.user.email,
       },
       process.env.JWT_SECRET
     );
@@ -61,5 +61,9 @@ router.get(
     });
   }
 );
+
+// mobile
+router.post("/mobile/send-otp", sendOtp);
+router.post("/mobile/check-otp", checkOtp);
 
 module.exports = router;
