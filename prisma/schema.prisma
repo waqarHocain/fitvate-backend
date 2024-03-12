@@ -13,7 +13,7 @@ model User {
   email        String?    @unique
   password     String?
   profilePic   String?
-  mobileNumber String?
+  mobileNumber String?    @unique
   dateofBirth  DateTime?
   gender       String?
   height       String?
