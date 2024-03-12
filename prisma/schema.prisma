@@ -8,9 +8,9 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String     @id @default(uuid())
   name         String?
-  email        String?   @unique
+  email        String?    @unique
   password     String?
   profilePic   String?
   mobileNumber String?
@@ -19,6 +19,16 @@ model User {
   height       String?
   weight       String?
   provider     String?
-  googleId     String?   @unique
-  facebookId   String?   @unique
+  purchases    Purchase[]
+  googleId     String?    @unique
+  facebookId   String?    @unique
+}
+
+model Purchase {
+  id            String @id @default(uuid())
+  orderId       String
+  productId     String
+  purchaseToken String
+  User          User   @relation(fields: [userId], references: [id])
+  userId        String
 }
