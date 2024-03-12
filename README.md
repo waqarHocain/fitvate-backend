@@ -12,3 +12,7 @@ Routes for authenticating with Google
 - `[GET] /users/{id}`: returns user profile
 - `[POST] /users/{id}`: updates user profile and returns the updated profile
 - `[DELETE] /user/{id}`: deletes user profile
+
+- `[GET] /users/{id}/orders`: returns orders
+- `[POST] /users/{id}/orders`: create new order
+- `[GET] /users/{id}/orders/{orderId}`: validate purchase from Google play
