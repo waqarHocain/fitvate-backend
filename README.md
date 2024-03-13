@@ -1,6 +1,18 @@
 # Backend for Fitvate app
 
-## Routes
+## Setup
+
+After you've cloned the repo, create a `.env` file in root directory and copy contents from `.env.example` file. Replace them with actual values.
+
+`cp ./.env.example ./.env`
+
+Install dependencies using `npm install`.
+
+Run `npx prisma migrate dev` & `npx prisma generate` and you're good to go.
+
+Run development server using `npm run dev`.
+
+## Endpoints
 
 ### Authentication
 
