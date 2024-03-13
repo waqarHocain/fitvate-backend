@@ -2,36 +2,11 @@ const router = require("express").Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
+const { googleAuth } = require("../controllers/auth.controller");
 const { sendOtp, checkOtp } = require("../controllers/mobileAuth.controller");
 
 // google
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
-
-router.get(
-  "/google/redirect",
-  passport.authenticate("google", {
-    failureRedirect: "/",
-    session: false,
-  }),
-  async (req, res) => {
-    const token = jwt.sign(
-      {
-        expiresIn: "12h",
-        id: req.user.id,
-      },
-      process.env.JWT_SECRET
-    );
-
-    res.json({
-      token,
-    });
-  }
-);
+router.post("/google", googleAuth);
 
 // facebook
 router.get(

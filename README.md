@@ -4,8 +4,7 @@
 
 ### Authentication
 
-- `[GET] /auth/google`: redirects user to consent screen
-- `[GET] /auth/google/redirect`: returns the generated JWT after user has signed up/in using google
+- `[POST] /auth/google`: verify the provided `idToken` and creates / retrieves the user
 - `[GET] /auth/facebook`: redirects user to facebook consent screen
 - `[GET] /auth/facebook/redirect`: returns the generated JWT after user has signed up/in using facebook
 - `[POST] /auth/mobile/send-otp`: sends an OTP code to provided mobile number
