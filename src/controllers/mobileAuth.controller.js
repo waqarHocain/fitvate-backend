@@ -77,7 +77,7 @@ const checkOtp = async (req, res) => {
             mobileNumber,
           },
         });
-        let tokenId = user.id;
+        let tokenId = user ? user.id : null;
         let responseUser = user; // to be sent in response
         if (!user) {
           const newUser = await db.user.create({
