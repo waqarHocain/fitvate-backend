@@ -2,6 +2,8 @@ const twilio = require("twilio");
 const jwt = require("jsonwebtoken");
 
 const db = require("../services/db");
+const { generateReqId } = require("../utils/generateReqId");
+const { generateToken } = require("../utils/generateToken");
 
 const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
@@ -10,10 +12,15 @@ const twilioClient = twilio(
 
 const sendOtp = async (req, res) => {
   const mobileNumber = req.body.mobileNumber;
+  const requestId = generateReqId();
 
   if (!mobileNumber)
     return res.status(400).json({
-      error: "Mobile number missing.",
+      message: "Mobile number missing.",
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
     });
 
   try {
@@ -24,12 +31,18 @@ const sendOtp = async (req, res) => {
         channel: "sms",
       });
     console.log(`Verification SID: ${verification.sid}`);
-    return res.json({ success: true, message: "OTP sent successfully" });
+    return res.json({
+      status: "success",
+      data: { message: "OTP sent successfully" },
+    });
   } catch (e) {
     console.error("Couldn't send OTP: ", e);
     return res.status(500).json({
-      success: false,
-      error: "Failed to send OTP",
+      message: "Failed to send OTP",
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
     });
   }
 };
@@ -38,9 +51,15 @@ const checkOtp = async (req, res) => {
   const mobileNumber = req.body.mobileNumber;
   const otp = req.body.otp;
 
+  const requestId = generateReqId();
+
   if (!mobileNumber || !otp)
     return res.status(400).json({
-      error: "Mobile number or otp code missing.",
+      message: "Mobile number or otp code missing.",
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
     });
 
   try {
@@ -59,6 +78,7 @@ const checkOtp = async (req, res) => {
           },
         });
         let tokenId = user.id;
+        let responseUser = user; // to be sent in response
         if (!user) {
           const newUser = await db.user.create({
             data: {
@@ -66,30 +86,46 @@ const checkOtp = async (req, res) => {
             },
           });
           tokenId = newUser.id;
+          responseUser = newUser;
         }
-        const token = jwt.sign(
-          {
-            expiresIn: "12h",
-            id: tokenId,
-          },
-          process.env.JWT_SECRET
-        );
+        const token = generateToken(tokenId);
+        delete responseUser.password;
         return res.json({
-          success: true,
-          message: "OTP verified successfully",
-          token,
+          status: "success",
+          data: {
+            success: true,
+            message: "OTP verified successfully",
+            user: responseUser,
+            token,
+          },
         });
       } catch (e) {
         console.error(e);
         return res.status(500).json({
-          error: "Unable to create account",
+          message: "Unable to create account",
+          status: "error",
+          code: 500,
+          timestamp: new Date(),
+          requestId,
         });
       }
     }
-    return res.status(400).json({ success: false, error: "Invalid OTP" });
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
+      message: "Invalid OTP",
+    });
   } catch (e) {
     console.error("Error verifying OTP:", e);
-    res.status(500).json({ success: false, error: "Failed to verify OTP" });
+    res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Failed to verify OTP",
+    });
   }
 };
 

@@ -1,7 +1,16 @@
 const router = require("express").Router();
 
-const { googleAuth, facebookAuth } = require("../controllers/auth.controller");
+const {
+  googleAuth,
+  facebookAuth,
+  signup,
+  login,
+} = require("../controllers/auth.controller");
 const { sendOtp, checkOtp } = require("../controllers/mobileAuth.controller");
+
+// email
+router.post("/signup", signup);
+router.post("/login", login);
 
 // google
 router.post("/google", googleAuth);

@@ -7,7 +7,7 @@ const ordersController = require("../controllers/orders.controller");
 router
   .route("/:id")
   .get(userController.getProfile)
-  .post(userController.updateProfile)
+  .put(userController.updateProfile)
   .delete(userController.deleteProfile);
 
 // orders

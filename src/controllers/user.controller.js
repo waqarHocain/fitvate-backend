@@ -1,7 +1,10 @@
 const db = require("../services/db");
+const { generateReqId } = require("../utils/generateReqId");
 
 const getProfile = async (req, res) => {
   const { id } = req.params;
+  const requestId = generateReqId();
+
   const user = await db.user.findUnique({
     where: {
       id,
@@ -9,29 +12,45 @@ const getProfile = async (req, res) => {
   });
 
   if (!user) {
-    return res.status(404).json({ error: "invalid user id" });
+    return res.status(404).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
+      message: "invalid user id",
+    });
   }
 
   return res.json({
-    name: user.name,
-    email: user.email,
-    profilePic: user.profilePic,
-    mobileNumber: user.mobileNumber,
-    dateOfBirth: user.dateofBirth,
-    gender: user.gender,
-    height: user.height,
-    weight: user.weight,
-    provider: user.provider,
+    status: "success",
+    data: {
+      name: user.name,
+      email: user.email,
+      profilePic: user.profilePic,
+      mobileNumber: user.mobileNumber,
+      dateOfBirth: user.dateofBirth,
+      gender: user.gender,
+      height: user.height,
+      weight: user.weight,
+      provider: user.provider,
+    },
   });
 };
 
 const updateProfile = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
+  const requestId = generateReqId();
 
   // only logged in user should be able to update own profile
   if (id !== userId) {
-    return res.status(401).json({ error: "Invalid user id" });
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Not Authorized",
+    });
   }
   const user = await db.user.findUnique({
     where: {
@@ -39,8 +58,12 @@ const updateProfile = async (req, res) => {
     },
   });
   if (!user)
-    return res.status(401).json({
-      error: "Invalid user id",
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
+      message: "Invalid user id",
     });
 
   const dataToBeUpdated = {};
@@ -55,7 +78,13 @@ const updateProfile = async (req, res) => {
   if (body.weight) dataToBeUpdated.weight = body.weight;
 
   if (Object.keys(dataToBeUpdated).length === 0)
-    return res.status(400).json({ error: "No data provided for update." });
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
+      message: "No data provided for update.",
+    });
 
   try {
     const updatedUser = await db.user.update({
@@ -69,10 +98,16 @@ const updateProfile = async (req, res) => {
 
     delete updatedUser.password;
     delete updatedUser.id;
-    return res.json({ ...updatedUser });
+    return res.json({ status: "success", data: { ...updatedUser } });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: "Unable to update user" });
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Unable to update user",
+    });
   }
 };
 
@@ -82,7 +117,13 @@ const deleteProfile = async (req, res) => {
 
   // only logged in user should be able to delete own profile
   if (id !== userId) {
-    return res.status(401).json({ error: "Invalid user id" });
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Not Authorized",
+    });
   }
   const user = await db.user.findUnique({
     where: {
@@ -90,8 +131,12 @@ const deleteProfile = async (req, res) => {
     },
   });
   if (!user)
-    return res.status(401).json({
-      error: "Invalid user id",
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
+      message: "invalid user id",
     });
 
   try {
@@ -101,11 +146,15 @@ const deleteProfile = async (req, res) => {
       },
     });
     return res.json({
-      success: "Profile has been deleted.",
+      status: "success",
     });
   } catch (e) {
     return res.status(500).json({
-      error: "Unable to delete profile",
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Unable to delete profile",
     });
   }
 };
