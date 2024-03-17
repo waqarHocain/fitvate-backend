@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const morgan = require("morgan");
 const passport = require("passport");
 
 // local imports
@@ -8,6 +9,9 @@ const authRouter = require("./routes/auth.js");
 const userRouter = require("./routes/user");
 
 const app = express();
+
+// logger
+app.use(morgan("tiny"));
 
 // Bodyparser Middleware
 app.use(express.json());
