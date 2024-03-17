@@ -14,7 +14,7 @@ model User {
   password     String?
   profilePic   String?
   mobileNumber String?    @unique
-  dateofBirth  DateTime?
+  dateofBirth  String?
   gender       String?
   height       String?
   weight       String?
