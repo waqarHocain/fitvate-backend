@@ -4,6 +4,16 @@ const { generateReqId } = require("../utils/generateReqId");
 const getProfile = async (req, res) => {
   const { id } = req.params;
   const requestId = generateReqId();
+  // only logged in user should be able to update own profile
+  if (id !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Not Authorized",
+    });
+  }
 
   const user = await db.user.findUnique({
     where: {
