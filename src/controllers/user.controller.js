@@ -86,6 +86,7 @@ const updateProfile = async (req, res) => {
   if (body.gender) dataToBeUpdated.gender = body.gender;
   if (body.height) dataToBeUpdated.height = body.height;
   if (body.weight) dataToBeUpdated.weight = body.weight;
+  if (body.fcm_token) dataToBeUpdated.fcm_token = body.fcm_token;
 
   if (Object.keys(dataToBeUpdated).length === 0)
     return res.status(400).json({
