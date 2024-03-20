@@ -19,6 +19,7 @@ model User {
   height       String?
   weight       String?
   provider     String?
+  fcm_token    String?
   purchases    Purchase[]
   googleId     String?    @unique
   facebookId   String?    @unique
