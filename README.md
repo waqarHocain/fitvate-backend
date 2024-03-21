@@ -31,5 +31,5 @@ Run development server using `npm run dev`.
 ### Purchases
 
 - `[GET] /users/{id}/orders`: returns orders
-- `[POST] /users/{id}/orders`: create new order
-- `[GET] /users/{id}/orders/{orderId}`: validate purchase from Google play
+- `[POST] /users/{id}/orders`: verifies and add the purcashe to user orders list
+- ~~`[GET] /users/{id}/orders/{orderId}`: validate purchase from Google play~~

@@ -4,9 +4,9 @@ function requireAuth(req, res, next) {
   const header = req.headers["authorization"];
   const accessToken = header.split(" ")[1];
   if (!accessToken)
-    return res.status(400).json({
+    return res.status(401).json({
       status: "error",
-      code: 400,
+      code: 401,
       timestamp: new Date(),
       message: "Access Token Missing.",
     });

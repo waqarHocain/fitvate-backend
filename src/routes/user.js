@@ -16,6 +16,4 @@ router
   .get(ordersController.getOrders)
   .post(ordersController.addOrder);
 
-router.get("/:id/orders/:orderId", ordersController.verifyOrder);
-
 module.exports = router;
