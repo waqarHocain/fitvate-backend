@@ -7,6 +7,7 @@ const passport = require("passport");
 // local imports
 const authRouter = require("./routes/auth.js");
 const userRouter = require("./routes/user");
+const { requireAuth } = require("./middlewares/requireAuth");
 
 const app = express();
 
@@ -17,16 +18,11 @@ app.use(morgan("tiny"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use(passport.initialize());
-require("./services/googleStrategy");
-require("./services/jwtStrategy");
-require("./services/facebookStrategy");
-
 // public route handlers
 app.use("/auth", authRouter);
 
 // protected route handlers
-app.use("/users", passport.authenticate("jwt", { session: false }), userRouter);
+app.use("/users", requireAuth, userRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
