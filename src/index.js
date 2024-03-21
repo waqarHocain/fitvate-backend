@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const morgan = require("morgan");
-const passport = require("passport");
 
 // local imports
 const authRouter = require("./routes/auth.js");

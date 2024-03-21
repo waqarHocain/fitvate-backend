@@ -1,5 +1,6 @@
 const url = require("url");
 const bcrpyt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const db = require("../services/db");
 const { generateToken } = require("../utils/generateToken");
@@ -54,7 +55,11 @@ const googleAuth = async (req, res) => {
       if (user) {
         delete user.password;
         const token = generateToken(user.id);
-        return res.json({ status: "success", data: { user, token } });
+        const refreshToken = generateToken(user.id, true);
+        return res.json({
+          status: "success",
+          data: { user, token, refreshToken },
+        });
       }
       const newUser = await db.user.create({
         data: {
@@ -66,8 +71,12 @@ const googleAuth = async (req, res) => {
         },
       });
       const token = generateToken(newUser.id);
+      const refreshToken = generateToken(user.id, true);
       delete newUser.password;
-      return res.json({ status: "success", data: { user: newUser, token } });
+      return res.json({
+        status: "success",
+        data: { user: newUser, token, refreshToken },
+      });
     } catch (e) {
       console.error(e);
       res.status(500).json({
@@ -150,9 +159,13 @@ const facebookAuth = async (req, res) => {
       },
     });
     if (user) {
-      const token = generateToken(user.id);
       delete user.password;
-      return res.json({ status: "success", data: { user, token } });
+      const token = generateToken(user.id);
+      const refreshToken = generateToken(user.id, true);
+      return res.json({
+        status: "success",
+        data: { user, token, refreshToken },
+      });
     }
 
     // fetch and create a new user
@@ -171,8 +184,12 @@ const facebookAuth = async (req, res) => {
       },
     });
     const token = generateToken(newUser.id);
+    const refreshToken = generateToken(user.id, true);
     delete newUser.password;
-    return res.json({ status: "success", data: { user: newUser, token } });
+    return res.json({
+      status: "success",
+      data: { user: newUser, token, refreshToken },
+    });
   } catch (e) {
     console.log(e);
     return res.status(500).json({
@@ -259,10 +276,14 @@ const signup = async (req, res) => {
     });
     delete newUser.password;
 
+    const token = generateToken(newUser.id);
+    const refreshToken = generateToken(newUser.id, true);
     return res.json({
       status: "success",
       data: {
         user: newUser,
+        token,
+        refreshToken,
       },
     });
   } catch (e) {
@@ -317,10 +338,12 @@ const login = async (req, res) => {
     }
 
     const token = generateToken(user.id);
+    const refreshToken = generateToken(user.id, true);
     return res.json({
       status: "success",
       data: {
         token,
+        refreshToken,
       },
     });
   } catch (e) {
@@ -334,4 +357,41 @@ const login = async (req, res) => {
     });
   }
 };
-module.exports = { googleAuth, facebookAuth, signup, login };
+
+const newAccessToken = async (req, res) => {
+  const { refreshToken } = req.body;
+  const requestId = generateReqId();
+
+  if (!refreshToken)
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      message: "Refresh token is missing.",
+      requestId,
+    });
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    if (decoded) {
+      const token = generateToken(decoded.id);
+      return res.json({
+        status: "success",
+        data: {
+          token,
+        },
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    return res.status(401).json({
+      status: "error",
+      code: 401,
+      timestamp: new Date(),
+      message: "Invalid Refresh Token.",
+      requestId,
+    });
+  }
+};
+
+module.exports = { googleAuth, facebookAuth, signup, login, newAccessToken };

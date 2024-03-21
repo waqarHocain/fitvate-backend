@@ -89,14 +89,15 @@ const checkOtp = async (req, res) => {
           responseUser = newUser;
         }
         const token = generateToken(tokenId);
+        const refreshToken = generateToken(tokenId, true);
+
         delete responseUser.password;
         return res.json({
           status: "success",
           data: {
-            success: true,
-            message: "OTP verified successfully",
             user: responseUser,
             token,
+            refreshToken,
           },
         });
       } catch (e) {

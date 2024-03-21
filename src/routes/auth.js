@@ -5,6 +5,7 @@ const {
   facebookAuth,
   signup,
   login,
+  newAccessToken,
 } = require("../controllers/auth.controller");
 const { sendOtp, checkOtp } = require("../controllers/mobileAuth.controller");
 
@@ -17,6 +18,9 @@ router.post("/google", googleAuth);
 
 // facebook
 router.post("/facebook", facebookAuth);
+
+// refresh token
+router.post("/refresh", newAccessToken);
 
 // mobile
 router.post("/mobile/send-otp", sendOtp);

@@ -20,6 +20,7 @@ Run development server using `npm run dev`.
 - `[POST] /auth/facebook`: verify the provided `idToken` and creates / retrieves the user
 - `[POST] /auth/mobile/send-otp`: sends an OTP code to provided mobile number
 - `[POST] /auth/mobile/check-otp`: verify OTP, if OTP is valid creates user account and send JWT
+- `[POST] /auth/refresh`: generates a new access token, payload: `{refreshToken: "valid refresh token"}`
 
 ### User Profile
 
