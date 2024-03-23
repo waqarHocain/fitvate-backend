@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 function requireAuth(req, res, next) {
   const header = req.headers["authorization"];
-  const accessToken = header.split(" ")[1];
+  const accessToken = header ? header.split(" ")[1] : null;
   if (!accessToken)
     return res.status(401).json({
       status: "error",
