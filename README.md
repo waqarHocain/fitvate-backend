@@ -31,5 +31,18 @@ Run development server using `npm run dev`.
 ### Purchases
 
 - `[GET] /users/{id}/orders`: returns orders
+- - response: `{status: "success", data: { data: [{id, orderId, purchaseToken, userId}] } }`
 - `[POST] /users/{id}/orders`: verifies and add the purcashe to user orders list
+- - payload: `{orderId, productId, purchaseToken}`
+- - response: `{ status: "success", data: { purchase: { id, orderId, purchaseToken, userId }, },}`
 - ~~`[GET] /users/{id}/orders/{orderId}`: validate purchase from Google play~~
+
+### Liked Exercises
+
+- `[GET] /users/id/liked-exercises`: returns user liked exercises
+- `[POST] /users/id/liked-exercises`: add a new exercise to liked exercises,
+- - payload: `{exerciseId: "exercise id"}`
+- - response: `{ status: "success", data: { exercise: { id, exerciseId, userId }, }, }`
+- `[DELETE] /users/id/liked-exercises`: delete exercise from liked exercises,
+- - payload: `{exerciseId: "exercise id"}`
+- - response: `{ status: "success" }`
