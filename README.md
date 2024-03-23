@@ -40,9 +40,21 @@ Run development server using `npm run dev`.
 ### Liked Exercises
 
 - `[GET] /users/id/liked-exercises`: returns user liked exercises
+- - response: `{status: "success", data: {exercises: [{ id, exerciseId, userId }]}}`
 - `[POST] /users/id/liked-exercises`: add a new exercise to liked exercises,
 - - payload: `{exerciseId: "exercise id"}`
 - - response: `{ status: "success", data: { exercise: { id, exerciseId, userId }, }, }`
 - `[DELETE] /users/id/liked-exercises`: delete exercise from liked exercises,
 - - payload: `{exerciseId: "exercise id"}`
+- - response: `{ status: "success" }`
+
+### Liked Articles
+
+- `[GET] /users/id/liked-articles`: returns user liked articles
+- - response: `{status: "success", data: {articles: [{ id, articleId, userId }]}}`
+- `[POST] /users/id/liked-articles`: add a new article to liked articles,
+- - payload: `{articleId: "article id"}`
+- - response: `{ status: "success", data: { article: { id, articleId, userId }, }, }`
+- `[DELETE] /users/id/liked-articles`: delete article from liked exercises,
+- - payload: `{articleId: "article id"}`
 - - response: `{ status: "success" }`

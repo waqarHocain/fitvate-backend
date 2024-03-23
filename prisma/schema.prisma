@@ -24,6 +24,7 @@ model User {
   facebookId     String?         @unique
   purchases      Purchase[]
   likedExercises LikedExercise[]
+  LikedArticle   LikedArticle[]
 }
 
 model LikedExercise {
@@ -31,6 +32,13 @@ model LikedExercise {
   exerciseId String @unique
   User       User   @relation(fields: [userId], references: [id])
   userId     String
+}
+
+model LikedArticle {
+  id        String @id @default(uuid())
+  articleId String @unique
+  User      User   @relation(fields: [userId], references: [id])
+  userId    String
 }
 
 model Purchase {
