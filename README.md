@@ -69,3 +69,14 @@ Run development server using `npm run dev`.
 - `[DELETE] /users/id/workout-plans`: delete a workout plan,
 - - payload: `{workoutPlanId: "workout plan id"}`
 - - response: `{ status: "success" }`
+
+### Challenges Progress
+
+- `[GET] /users/id/challenges`: returns user challenges
+- - response: `{status: "success", data: {challenges: [{ id, challengeId, userId }]}}`
+- `[POST] /users/id/challenges`: add a new challenge,
+- - payload: `{ challengeId }`
+- - response: `{ status: "success", data: { challenge: { id, challengeId, userId }, }, }`
+- `[DELETE] /users/id/challenges`: delete a challenge,
+- - payload: `{ challengeId }`
+- - response: `{ status: "success" }`
