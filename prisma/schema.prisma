@@ -25,6 +25,30 @@ model User {
   purchases      Purchase[]
   likedExercises LikedExercise[]
   LikedArticle   LikedArticle[]
+  WorkoutPlan    WorkoutPlan[]
+  Challenge      Challenge[]
+  Reminder       Reminder[]
+}
+
+model WorkoutPlan {
+  id            String @id @default(uuid())
+  workoutPlanId String @unique
+  User          User   @relation(fields: [userId], references: [id])
+  userId        String
+}
+
+model Challenge {
+  id          String @id @default(uuid())
+  challengeId String @unique
+  User        User   @relation(fields: [userId], references: [id])
+  userId      String
+}
+
+model Reminder {
+  id         String @id @default(uuid())
+  reminderId String @unique
+  User       User   @relation(fields: [userId], references: [id])
+  userId     String
 }
 
 model LikedExercise {
