@@ -80,3 +80,14 @@ Run development server using `npm run dev`.
 - `[DELETE] /users/id/challenges`: delete a challenge,
 - - payload: `{ challengeId }`
 - - response: `{ status: "success" }`
+
+### Reminders
+
+- `[GET] /users/id/reminders`: returns user reminders
+- - response: `{status: "success", data: {reminders: [{ id, reminderId, userId }]}}`
+- `[POST] /users/id/reminders`: add a new reminder,
+- - payload: `{ reminderId }`
+- - response: `{ status: "success", data: { reminder: { id, reminderId, userId }, }, }`
+- `[DELETE] /users/id/reminders`: delete a reminder,
+- - payload: `{ reminderId }`
+- - response: `{ status: "success" }`
