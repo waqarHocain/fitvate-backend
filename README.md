@@ -62,12 +62,137 @@ Run development server using `npm run dev`.
 ### Workout Plans
 
 - `[GET] /users/id/workout-plans`: returns user workoutplans
-- - response: `{status: "success", data: {plans: [{ id, workoutPlanId, userId }]}}`
+- - response:
+- - ```
+    {
+    status: "success",
+      data: {
+        plans: [
+          {
+            id: str,
+            "planId": "fslajk",
+            "planName": "fjdskl",
+            "planDescription": null,
+            "planThemeColor": null,
+            "planCategory": null,
+            "isPurchased": true,
+            "duration": null,
+            "goal": null,
+            "planType": null,
+            weeks: [
+              {
+                "id": str,
+      			    "weekId": str,
+      			    "isCompleted": false,
+      			    "workoutPlanId": str,
+      			    "days": [
+                  {
+                    "id": str,
+                    "dayId": "str,
+                    "isCompleted": boolean,
+                    "weekId": str,
+                    "exercises": [
+                      {
+                        "id": str,
+                        "exerciseId": str,
+                        "displayIndex": int,
+                        "weightUsed": str,
+                        "isCompleted": boolean,
+                        "dayId": str
+                      }
+                    ]
+              }
+            ]
+          },
+        ]
+      }
+    }
+    ```
+
 - `[POST] /users/id/workout-plans`: add a new workout plan,
-- - payload: `{workoutPlanId: "workoutplan id"}`
-- - response: `{ status: "success", data: { plan: { id, workoutPlanId, userId }, }, }`
+
+- - payload:
+- - ```
+    {
+       planId: str,
+       planName: str,
+       planDescription: str?,
+       planThemeColor: str?,
+       planCategory: str?,
+       isPurchased: boolean?,
+       duration: str?,
+       goal: str?,
+       planType: str?,
+       weeks: [
+          {
+            weekId: str,
+            isCompleted: boolean?,
+            days: [
+              {
+                dayId: str,
+                isCompleted: boolean?,
+                exercises: [
+                  {
+                    exerciseId: str,
+                    weightUsed: str,
+                    displayIndex: int,
+                    isCompleted: boolean?,
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ```
+
+- - response:
+- - ```
+    {
+      status: "success",
+      data: {
+         plan: {
+          id: str,
+          "planId": "fslajk",
+          "planName": "fjdskl",
+          "planDescription": null,
+          "planThemeColor": null,
+          "planCategory": null,
+          "isPurchased": true,
+          "duration": null,
+          "goal": null,
+          "planType": null,
+          weeks: [
+            {
+              "id": str,
+    			    "weekId": str,
+    			    "isCompleted": false,
+    			    "workoutPlanId": str,
+    			    "days": [
+                {
+                  "id": str,
+                  "dayId": "str,
+                  "isCompleted": boolean,
+                  "weekId": str,
+                  "exercises": [
+                    {
+                      "id": str,
+                      "exerciseId": str,
+                      "displayIndex": int,
+                      "weightUsed": str,
+                      "isCompleted": boolean,
+                      "dayId": str
+                    }
+                  ]
+            }
+          ]
+         },
+      },
+    }
+    ```
+
 - `[DELETE] /users/id/workout-plans`: delete a workout plan,
-- - payload: `{workoutPlanId: "workout plan id"}`
+- - payload: `{workoutPlanId: str}`
 - - response: `{ status: "success" }`
 
 ### Challenges Progress
@@ -91,3 +216,7 @@ Run development server using `npm run dev`.
 - `[DELETE] /users/id/reminders`: delete a reminder,
 - - payload: `{ reminderId }`
 - - response: `{ status: "success" }`
+
+```
+
+```
