@@ -209,12 +209,75 @@ Run development server using `npm run dev`.
 ### Reminders
 
 - `[GET] /users/id/reminders`: returns user reminders
-- - response: `{status: "success", data: {reminders: [{ id, reminderId, userId }]}}`
+- - response:
+
+  ```
+    {
+      "status": "success",
+      "data": {
+        "reminders": [
+          {
+            "id": str,
+            "reminderId": str,
+            "reminderName": str,
+            "reminderTime": str,
+            "status": str,
+            "uuid": str,
+            "userId": str,
+            "repeatDays": [
+              {
+                "dayNum": 4
+              },
+              {
+                "dayNum": 2
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ```
+
 - `[POST] /users/id/reminders`: add a new reminder,
-- - payload: `{ reminderId }`
-- - response: `{ status: "success", data: { reminder: { id, reminderId, userId }, }, }`
+- - payload:
+
+```
+{
+  "reminderId" : str,
+	"reminderName": str,
+	"reminderTime": str,
+	"status": str,
+	"uuid": str,
+	"repeatDays": [int]
+}
+```
+
+- - response:
+
+```
+{
+	"status": "success",
+	"data": {
+		"reminder": {
+			"id": str,
+			"reminderId": str,
+			"reminderName": str,
+			"reminderTime": str,
+			"status": str,
+			"uuid": str,
+			"userId": str,
+			"repeatDays": [
+				{
+					"dayNum": int
+				},
+			]
+		}
+	}
+}
+```
+
 - `[DELETE] /users/id/reminders`: delete a reminder,
-- - payload: `{ reminderId }`
+- - payload: `{ reminderId: str }`
 - - response: `{ status: "success" }`
 
 ```

@@ -18,6 +18,13 @@ const getReminders = async (req, res) => {
   try {
     const reminders = await db.reminder.findMany({
       where: { userId },
+      include: {
+        repeatDays: {
+          select: {
+            dayNum: true,
+          },
+        },
+      },
     });
     return res.json({
       status: "success",
@@ -38,10 +45,28 @@ const getReminders = async (req, res) => {
 };
 
 const addReminder = async (req, res) => {
-  const { id: userId } = req.params;
-  const { reminderId } = req.body;
-
   const requestId = generateReqId();
+  const { id: userId } = req.params;
+  const { reminderId, reminderName, reminderTime, status, uuid, repeatDays } =
+    req.body;
+
+  if (
+    !reminderId ||
+    !reminderName ||
+    !reminderTime ||
+    !status ||
+    !uuid ||
+    !repeatDays
+  ) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing reminder data",
+    });
+  }
+
   // only logged in user should be able to update data
   if (userId !== req.user.id) {
     return res.status(403).json({
@@ -50,16 +75,6 @@ const addReminder = async (req, res) => {
       timestamp: new Date(),
       requestId,
       message: "Forbidden",
-    });
-  }
-
-  if (!reminderId) {
-    return res.status(422).json({
-      status: "error",
-      code: 422,
-      timestamp: new Date(),
-      requestId,
-      message: "Missing reminder id",
     });
   }
 
@@ -79,10 +94,32 @@ const addReminder = async (req, res) => {
       });
     }
 
+    const repeatDaysData = [];
+    if (repeatDays.length > 0) {
+      repeatDays.forEach((d) => {
+        repeatDaysData.push({
+          dayNum: d,
+        });
+      });
+    }
     const reminder = await db.reminder.create({
       data: {
         reminderId,
+        reminderName,
+        reminderTime,
+        status,
+        uuid,
         userId,
+        repeatDays: {
+          create: [...repeatDaysData],
+        },
+      },
+      include: {
+        repeatDays: {
+          select: {
+            dayNum: true,
+          },
+        },
       },
     });
 

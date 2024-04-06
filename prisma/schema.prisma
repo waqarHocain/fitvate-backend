@@ -84,10 +84,22 @@ model Challenge {
 }
 
 model Reminder {
-  id         String @id @default(uuid())
-  reminderId String @unique
-  User       User   @relation(fields: [userId], references: [id])
-  userId     String
+  id           String              @id @default(uuid())
+  reminderId   String              @unique
+  reminderName String
+  reminderTime String
+  status       String
+  uuid         String
+  repeatDays   ReminderRepeatDay[]
+  User         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+}
+
+model ReminderRepeatDay {
+  id         String   @id @default(uuid())
+  dayNum     Int
+  Reminder   Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  reminderId String
 }
 
 model LikedExercise {
