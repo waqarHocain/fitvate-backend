@@ -98,25 +98,25 @@ const addWorkoutPlan = async (req, res) => {
   // populate weeks data
   const weeksData = [];
   weeks.forEach((week) => {
-    const obj = { weekId: week.weekId, days: [] };
+    const obj = { weekId: week.weekId, days: { create: [] } };
     if (week.isCompleted) obj.isCompleted = week.isCompleted;
 
     if (week.days.length > 0) {
       week.days.forEach((day) => {
-        const dayObj = { dayId: day.dayId, exercises: [] };
+        const dayObj = { dayId: day.dayId, exercises: { create: [] } };
         if (day.isCompleted) dayObj.isCompleted = day.isCompleted;
         if (day.exercises.length > 0) {
           day.exercises.forEach((ex) => {
             const exerciseObj = {
               exerciseId: ex.exerciseId,
               weightUsed: ex.weightUsed,
-              displayIndex: ex.displayIndex,
+              displayIndex: parseInt(ex.displayIndex),
             };
             if (ex.isCompleted) exerciseObj.isCompleted = ex.isCompleted;
-            dayObj.exercises.push(exerciseObj);
+            dayObj.exercises.create.push(exerciseObj);
           });
         }
-        obj.days.push(dayObj);
+        obj.days.create.push(dayObj);
       });
     }
     weeksData.push(obj);
@@ -142,38 +142,9 @@ const addWorkoutPlan = async (req, res) => {
       data: {
         ...planData,
         userId: userId,
-      },
-    });
-
-    for (const wkData of weeksData) {
-      const week = await db.week.create({
-        data: {
-          weekId: wkData.weekId,
-          isCompleted: wkData.isCompleted ? true : false,
-          workoutPlanId: plan.id,
+        weeks: {
+          create: [...weeksData],
         },
-      });
-
-      // days
-      for (const dayData of wkData.days) {
-        await db.day.create({
-          data: {
-            dayId: dayData.dayId,
-            isCompleted: dayData.isCompleted ? true : false,
-            weekId: week.id,
-            exercises: {
-              createMany: {
-                data: [...dayData.exercises],
-              },
-            },
-          },
-        });
-      }
-    }
-
-    const result = await db.workoutPlan.findUnique({
-      where: {
-        planId: planData.planId,
       },
       include: {
         weeks: {
@@ -187,12 +158,11 @@ const addWorkoutPlan = async (req, res) => {
         },
       },
     });
-    delete result.userId;
 
     return res.json({
       status: "success",
       data: {
-        plan: result,
+        plan,
       },
     });
   } catch (e) {
