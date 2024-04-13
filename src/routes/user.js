@@ -40,6 +40,7 @@ router
   .route("/:id/workout-plans")
   .get(workoutPlansController.getWorkoutPlans)
   .post(workoutPlansController.addWorkoutPlan)
+  .put(workoutPlansController.updateWorkoutPlan)
   .delete(workoutPlansController.removeWorkoutPlan);
 
 // challenges

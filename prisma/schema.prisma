@@ -48,7 +48,7 @@ model WorkoutPlan {
 
 model Week {
   id            String      @id @default(uuid())
-  weekId        String
+  weekId        String      @unique
   isCompleted   Boolean     @default(false)
   days          Day[]
   WorkoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
@@ -57,7 +57,7 @@ model Week {
 
 model Day {
   id          String     @id @default(uuid())
-  dayId       String
+  dayId       String     @unique
   isCompleted Boolean    @default(false)
   exercises   Exercise[]
 
@@ -67,7 +67,7 @@ model Day {
 
 model Exercise {
   id           String  @id @default(uuid())
-  exerciseId   String
+  exerciseId   String  @unique
   displayIndex Int
   weightUsed   String
   isCompleted  Boolean @default(false)
