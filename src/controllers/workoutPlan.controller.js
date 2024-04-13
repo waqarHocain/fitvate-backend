@@ -97,25 +97,40 @@ const addWorkoutPlan = async (req, res) => {
   // populate weeks data
   const weeksData = [];
   weeks.forEach((week) => {
-    const obj = { weekId: week.weekId, days: { create: [] } };
-    if (week.isCompleted) obj.isCompleted = week.isCompleted;
+    const obj = {
+      create: { weekId: week.weekId, days: { connectOrCreate: [] } },
+      where: { weekId: week.weekId },
+    };
+    if (week.isCompleted !== undefined)
+      obj.create.isCompleted = week.isCompleted;
 
     if (week.days.length > 0) {
       week.days.forEach((day) => {
-        const dayObj = { dayId: day.dayId, exercises: { create: [] } };
-        if (day.isCompleted) dayObj.isCompleted = day.isCompleted;
+        const dayObj = {
+          where: { dayId: day.dayId },
+          create: { dayId: day.dayId, exercises: { connectOrCreate: [] } },
+        };
+        if (day.isCompleted !== undefined)
+          dayObj.create.isCompleted = day.isCompleted;
+
         if (day.exercises.length > 0) {
           day.exercises.forEach((ex) => {
             const exerciseObj = {
-              exerciseId: ex.exerciseId,
-              weightUsed: ex.weightUsed,
-              displayIndex: parseInt(ex.displayIndex),
+              create: {
+                exerciseId: ex.exerciseId,
+                weightUsed: ex.weightUsed,
+                displayIndex: parseInt(ex.displayIndex),
+              },
+              where: {
+                exerciseId: ex.exerciseId,
+              },
             };
-            if (ex.isCompleted) exerciseObj.isCompleted = ex.isCompleted;
-            dayObj.exercises.create.push(exerciseObj);
+            if (ex.isCompleted !== undefined)
+              exerciseObj.create.isCompleted = ex.isCompleted;
+            dayObj.create.exercises.connectOrCreate.push(exerciseObj);
           });
         }
-        obj.days.create.push(dayObj);
+        obj.create.days.connectOrCreate.push(dayObj);
       });
     }
     weeksData.push(obj);
@@ -142,7 +157,7 @@ const addWorkoutPlan = async (req, res) => {
         ...planData,
         userId: userId,
         weeks: {
-          create: [...weeksData],
+          connectOrCreate: [...weeksData],
         },
       },
       include: {
