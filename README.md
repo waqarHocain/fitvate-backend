@@ -191,6 +191,37 @@ Run development server using `npm run dev`.
     }
     ```
 
+- `[PUT] /users/id/workout-plans`:  edit a workout plan,
+- - payload: 
+  - ```
+    {
+       planId: "er23j",
+       // other fields that need to be updated, like: planName: "Updated Plan",  
+       weeks: [
+          {
+            weekId: "fjdk",
+            isCompleted: false,
+            days: [
+              {
+                dayId: "fjdk",
+                isCompleted: true,
+                exercises: [
+                  {
+                    exerciseId: "4bd3e",
+                    weightUsed: "4",
+                    displayIndex: 1,
+                    isCompleted: true,
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ```
+- - response: returns the updated plan
+
+
 - `[DELETE] /users/id/workout-plans`: delete a workout plan,
 - - payload: `{workoutPlanId: str}`
 - - response: `{ status: "success" }`
