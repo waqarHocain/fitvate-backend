@@ -127,11 +127,11 @@ model Purchase {
 }
 
 model Article {
-  id       String @id @default(uuid())
+  id       String  @id @default(uuid())
   title    String
   body     String
-  imageUrl String
+  imageUrl String?
   category String
-  User     User   @relation(fields: [userId], references: [id])
+  User     User    @relation(fields: [userId], references: [id])
   userId   String
 }
