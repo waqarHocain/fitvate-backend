@@ -7,6 +7,7 @@ const articlesController = require("../controllers/likedArticles.controller");
 const workoutPlansController = require("../controllers/workoutPlan.controller");
 const challengesController = require("../controllers/challenges.controller");
 const remindersController = require("../controllers/reminders.controller");
+const postsController = require("../controllers/articles.controller");
 
 // user profile
 router
@@ -56,5 +57,17 @@ router
   .get(remindersController.getReminders)
   .post(remindersController.addReminder)
   .delete(remindersController.removeReminder);
+
+// articles
+router
+  .route("/:id/posts")
+  .get(postsController.getAllArticles)
+  .post(postsController.createArticle);
+
+router
+  .route("/:id/posts/:articleId")
+  .get(postsController.getSingleArticle)
+  .put(postsController.updateArticle)
+  .delete(postsController.deleteArticle);
 
 module.exports = router;
