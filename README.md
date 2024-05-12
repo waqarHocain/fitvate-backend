@@ -311,6 +311,21 @@ Run development server using `npm run dev`.
 - - payload: `{ reminderId: str }`
 - - response: `{ status: "success" }`
 
-```
+### Articles
 
-```
+- `[GET] /users/id/posts`: returns a user's articles
+- - response: `{status: success, data: {articles: [{ id, title, body, imageUrl?, category }]}}`
+
+- `[POST] /users/id/posts`: creates a new article
+- - payload: `{title, body, category, imageUrl?}`
+  - response: `{status: success, data: { articles: [] }}` 
+
+- `[GET] /users/id/posts/articleId`: returns article for provided id
+- - response: `{status: success, data: {id, title, body, imageUrl, category, userId}}`
+
+- `[PUT] /users/id/posts/articleId`: updates articles content and returns the updated article
+- - payload: it can be any of `title, body, imageUrl, category` or all of them
+- - response: `{status: success, data: {id, title, body, imageUrl, category, userId}}`
+ 
+- `[DELETE] /users/id/posts/articleId`: deletes an article
+- - response: `{status: success}`
