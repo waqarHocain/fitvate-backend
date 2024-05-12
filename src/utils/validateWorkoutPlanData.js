@@ -27,32 +27,33 @@ const isValidWorkoutPlan = (data) => {
 
   const isValid = true;
 
-  weeks.forEach((week) => {
-    if (!week.weekId) {
-      isValid = false;
-      return null;
-    }
-    const days = week.days;
-    if (days.length > 0) {
-      days.forEach((day) => {
-        if (!day.dayId) {
-          isValid = false;
-          return null;
-        }
-        const exercises = day.exercises;
-        exercises.forEach((exercise) => {
-          if (
-            !exercise.exerciseId ||
-            !exercise.weightUsed ||
-            !exercise.displayIndex
-          ) {
+  weeks &&
+    weeks.forEach((week) => {
+      if (!week.weekId) {
+        isValid = false;
+        return null;
+      }
+      const days = week.days;
+      if (days.length > 0) {
+        days.forEach((day) => {
+          if (!day.dayId) {
             isValid = false;
             return null;
           }
+          const exercises = day.exercises;
+          exercises.forEach((exercise) => {
+            if (
+              !exercise.exerciseId ||
+              !exercise.weightUsed ||
+              !exercise.displayIndex
+            ) {
+              isValid = false;
+              return null;
+            }
+          });
         });
-      });
-    }
-  });
+      }
+    });
 
   if (!isValid) return false;
 
