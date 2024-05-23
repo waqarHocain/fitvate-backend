@@ -135,3 +135,9 @@ model Article {
   User     User    @relation(fields: [userId], references: [id])
   userId   String
 }
+
+model DailyActiveUser {
+  id      String   @id @default(uuid())
+  date    DateTime
+  counter Int
+}
