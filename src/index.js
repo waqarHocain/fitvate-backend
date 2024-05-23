@@ -4,11 +4,15 @@ const express = require("express");
 const morgan = require("morgan");
 
 // local imports
+const { connectRedis } = require("./services/redis");
 const authRouter = require("./routes/auth.js");
 const userRouter = require("./routes/user");
 const { requireAuth } = require("./middlewares/requireAuth");
 
 const app = express();
+
+// connect to redis server
+connectRedis();
 
 // logger
 app.use(morgan("tiny"));
