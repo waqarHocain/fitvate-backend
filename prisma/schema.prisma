@@ -137,7 +137,7 @@ model Article {
 }
 
 model DailyActiveUser {
-  id      String   @id @default(uuid())
-  date    DateTime @unique @default(now())
+  id      String @id @default(uuid())
+  date    String @unique
   counter Int
 }
