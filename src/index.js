@@ -7,6 +7,7 @@ const morgan = require("morgan");
 const { connectRedis } = require("./services/redis");
 const authRouter = require("./routes/auth.js");
 const userRouter = require("./routes/user");
+const analyticsRouter = require("./routes/analytics");
 const { requireAuth } = require("./middlewares/requireAuth");
 const { dailyActiveUsers } = require("./middlewares/dau");
 
@@ -27,6 +28,7 @@ app.use("/auth", authRouter);
 
 // protected route handlers
 app.use("/users", requireAuth, dailyActiveUsers, userRouter);
+app.use("/analytics", requireAuth, dailyActiveUsers, analyticsRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
