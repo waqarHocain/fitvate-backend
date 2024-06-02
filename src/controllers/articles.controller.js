@@ -54,9 +54,10 @@ const createArticle = async (req, res) => {
     });
   }
 
-  const { title, body, category, imageUrl } = req.body;
+  const { title, body, category, imageUrl, topic, type, locale, source } =
+    req.body;
 
-  if (!title || !body || !category) {
+  if (!title || !body || !imageUrl || !topic || !type || !locale) {
     return res.status(422).json({
       status: "error",
       code: 422,
@@ -84,14 +85,15 @@ const createArticle = async (req, res) => {
     });
   }
 
+  const articleData = { title, body, imageUrl, topic, type, locale };
+  if (source) articleData.source = source;
+  if (category) articleData.category = category;
+
   try {
     const newArticle = await db.article.create({
       data: {
-        title,
-        body,
-        category,
+        ...articleData,
         userId,
-        imageUrl: imageUrl ? imageUrl : null,
       },
     });
 
