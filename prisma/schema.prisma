@@ -130,9 +130,12 @@ model Article {
   id       String  @id @default(uuid())
   title    String
   body     String
-  imageUrl String?
-  category String
-  locale   String  @default("en")
+  imageUrl String
+  topic    String
+  type     String
+  locale   String
+  source   String?
+  category String?
   User     User    @relation(fields: [userId], references: [id])
   userId   String
 }
