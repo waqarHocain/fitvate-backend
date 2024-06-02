@@ -312,19 +312,22 @@ Run development server using `npm run dev`.
 
 ### Articles
 
-- `[GET] /users/id/posts`: returns a user's articles
-- - response: `{status: success, data: {articles: [{ id, title, body, imageUrl?, category }]}}`
+- `[GET] /users/id/posts`: returns a user's articles, accepts two query parameters `pageNumber` and `locale`
+- - response: `{status: success, data: {articles: [{ title, body, imageUrl, type, topic, locale, category, source }], totalPages: 1 }}`
+
+- You can filter results based on a particular `locale` or query any of the available pages by making a `GET` request:
+- `/user/id/posts?locale=en&pageNumber=2` will only select the `en` locale articles and return the `2` page.
 
 - `[POST] /users/id/posts`: creates a new article
-- - payload: `{title, body, category, imageUrl?}`
-  - response: `{status: success, data: { articles: [] }}`
+- - payload: `{title, body, imageUrl, type, topic, locale, category?, source?}`
+  - response: `{status: success, data: { article: {id, title, body, imageUrl, type, topic, locale, category?, source?, userId } }}`
 
 - `[GET] /users/id/posts/articleId`: returns article for provided id
-- - response: `{status: success, data: {id, title, body, imageUrl, category, userId}}`
+- - response: `{status: success, data: {id, title, body, imageUrl, type, topic, locale, category, source, userId}}`
 
 - `[PUT] /users/id/posts/articleId`: updates articles content and returns the updated article
 - - payload: it can be any of `title, body, imageUrl, category` or all of them
-- - response: `{status: success, data: {id, title, body, imageUrl, category, userId}}`
+- - response: `{status: success, data: {id, title, body, imageUrl, type, topic, locale, category, source, userId}}`
 
 - `[DELETE] /users/id/posts/articleId`: deletes an article
 - - response: `{status: success}`

@@ -15,17 +15,45 @@ const getAllArticles = async (req, res) => {
     });
   }
 
+  const condition = {
+    userId,
+  };
+
+  const { locale } = req.query;
+  if (locale) condition.locale = locale;
+
+  // pagination setup
+  const resultsPerPage = 10;
+
+  let { pageNumber } = req.query;
+  if (!pageNumber) pageNumber = 1;
+  pageNumber = Number(pageNumber);
+
+  const itemsToSkip = pageNumber === 1 ? 0 : resultsPerPage * (pageNumber - 1);
+
   try {
-    const articles = await db.article.findMany({
-      where: {
-        userId,
-      },
-    });
+    const [count, articles] = await db.$transaction([
+      db.article.count({
+        where: {
+          ...condition,
+        },
+      }),
+      db.article.findMany({
+        where: {
+          ...condition,
+        },
+        take: resultsPerPage,
+        skip: itemsToSkip,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(count / resultsPerPage);
 
     return res.json({
       status: "success",
       data: {
         articles,
+        totalPages,
       },
     });
   } catch (e) {
