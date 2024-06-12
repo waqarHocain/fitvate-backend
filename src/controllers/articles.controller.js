@@ -15,15 +15,13 @@ const getAllArticles = async (req, res) => {
     });
   }
 
-  const condition = {
-    userId,
-  };
+  const condition = {};
 
-  const { locale } = req.query;
+  const { locale, pageSize } = req.query;
   if (locale) condition.locale = locale;
 
   // pagination setup
-  const resultsPerPage = 10;
+  const resultsPerPage = pageSize ? Number(pageSize) : 10;
 
   let { pageNumber } = req.query;
   if (!pageNumber) pageNumber = 1;
@@ -42,6 +40,9 @@ const getAllArticles = async (req, res) => {
         where: {
           ...condition,
         },
+        orderBy: {
+          createdAt: "asc",
+        },
         take: resultsPerPage,
         skip: itemsToSkip,
       }),
@@ -54,6 +55,8 @@ const getAllArticles = async (req, res) => {
       data: {
         articles,
         totalPages,
+        currentPageNumber: pageNumber,
+        pageSize: resultsPerPage,
       },
     });
   } catch (e) {
