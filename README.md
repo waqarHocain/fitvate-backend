@@ -313,21 +313,21 @@ Run development server using `npm run dev`.
 ### Articles
 
 - `[GET] /users/id/posts`: returns a user's articles, accepts two query parameters `pageNumber` and `locale`
-- - response: `{status: success, data: {articles: [{ title, body, imageUrl, type, topic, locale, category, source }], totalPages: 1 }}`
+- - response: `{status: success, data: {articles: [{ title, body, imageUrl, type, topic, locale, category, source, createdAt, updatedAt, userId }], totalPages: 1, currentPageNumber: 1, pageSize: 10 }}`
 
-- You can filter results based on a particular `locale` or query any of the available pages by making a `GET` request:
+- You can filter results based on a particular `locale` or query any of the available pages by making a `GET` request, also you can pass the `pageSize` parameter:
 - `/user/id/posts?locale=en&pageNumber=2` will only select the `en` locale articles and return the `2` page.
 
 - `[POST] /users/id/posts`: creates a new article
 - - payload: `{title, body, imageUrl, type, topic, locale, category?, source?}`
-  - response: `{status: success, data: { article: {id, title, body, imageUrl, type, topic, locale, category?, source?, userId } }}`
+  - response: `{status: success, data: { article: {id, title, body, imageUrl, type, topic, locale, category?, source?, createdAt, updatedAt, userId } }}`
 
 - `[GET] /users/id/posts/articleId`: returns article for provided id
-- - response: `{status: success, data: {id, title, body, imageUrl, type, topic, locale, category, source, userId}}`
+- - response: `{status: success, data: {id, title, body, imageUrl, type, topic, locale, category, source, createdAt, updatedAt, userId}}`
 
 - `[PUT] /users/id/posts/articleId`: updates articles content and returns the updated article
 - - payload: it can be any of `title, body, imageUrl, category` or all of them
-- - response: `{status: success, data: {id, title, body, imageUrl, type, topic, locale, category, source, userId}}`
+- - response: `{status: success, data: {id, title, body, imageUrl, type, topic, locale, category, source, createdAt, updatedAt, userId}}`
 
 - `[DELETE] /users/id/posts/articleId`: deletes an article
 - - response: `{status: success}`
