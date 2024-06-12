@@ -128,9 +128,9 @@ model Purchase {
 
 model Article {
   id       String  @id @default(uuid())
-  title    String
-  body     String
-  imageUrl String
+  title    String  @db.Text
+  body     String  @db.Text
+  imageUrl String  @db.Text
   topic    String
   type     String
   locale   String
