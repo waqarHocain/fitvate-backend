@@ -41,7 +41,7 @@ const getAllArticles = async (req, res) => {
           ...condition,
         },
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
         take: resultsPerPage,
         skip: itemsToSkip,
