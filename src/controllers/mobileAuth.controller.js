@@ -49,6 +49,7 @@ const sendOtp = async (req, res) => {
 
 const checkOtp = async (req, res) => {
   const mobileNumber = req.body.mobileNumber;
+  const name = req.body.name;
   const otp = req.body.otp;
 
   const requestId = generateReqId();
@@ -80,8 +81,19 @@ const checkOtp = async (req, res) => {
         let tokenId = user ? user.id : null;
         let responseUser = user; // to be sent in response
         if (!user) {
+          // user name must be provided for new users
+          if (!name) {
+            return res.status(400).json({
+              message: "User name missing.",
+              status: "error",
+              code: 400,
+              timestamp: new Date(),
+              requestId,
+            });
+          }
           const newUser = await db.user.create({
             data: {
+              name,
               mobileNumber,
             },
           });
