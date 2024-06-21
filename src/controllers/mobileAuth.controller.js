@@ -12,6 +12,7 @@ const twilioClient = twilio(
 
 const sendOtp = async (req, res) => {
   const mobileNumber = req.body.mobileNumber;
+  const name = req.body.name;
   const requestId = generateReqId();
 
   if (!mobileNumber)
@@ -22,6 +23,35 @@ const sendOtp = async (req, res) => {
       timestamp: new Date(),
       requestId,
     });
+
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        mobileNumber,
+      },
+    });
+    if (!user) {
+      // user name must be provided for new users
+      if (!name) {
+        return res.status(400).json({
+          message: "User name missing.",
+          status: "error",
+          code: 400,
+          timestamp: new Date(),
+          requestId,
+        });
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      message: "Error fetching user info from database.",
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+    });
+  }
 
   try {
     const verification = await twilioClient.verify.v2
