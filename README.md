@@ -199,13 +199,25 @@ Run development server using `npm run dev`.
 - - payload: `{workoutPlanId: str}`
 - - response: `{ status: "success" }`
 
-- `[POST] /users/id/workout-plans/add-week`: adds week to an existing workout plan
+- `[POST] /users/id/workout-plans/week`: adds week to an existing workout plan
 - - payload: `{ workoutPlanId, weekId, isCompleted? }`
 - - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId } }}`
 
-- `[POST] /users/id/workout-plans/add-day`: adds a day to an existing week
+- `[PUT] /users/id/workout-plans/week`: updates a week data
+- - payload: `{ workoutPlanId, weekId, isCompleted? }`
+- - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId } }}`
+
+- `[POST] /users/id/workout-plans/day`: adds a day to an existing week
 - - payload: `{ dayId, weekId, isCompleted?, exercises?: [{exerciseId, weightUsed, displayIndex, isCompleted?}] }`
 - - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted, exercises: [{id, exerciseId, displayIndex, weightUsed, isCompleted, dayId}] } }}`
+
+- `[PUT] /users/id/workout-plans/day`: updates a day
+- - payload: `{ dayId, weekId, isCompleted }`
+- - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted }}}`
+
+- `[POST] /users/id/workout-plans/exercise`: adds an exercise to an existing day
+- - payload: `{ dayId, exerciseId, weightUsed, displayIndex, isCompleted? }`
+- - response: `{ status: "success", data: { exercise: {id, exerciseId, displayIndex, weightUsed, isCompleted, dayId }}}`
 
 ### Challenges Progress
 

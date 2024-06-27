@@ -44,8 +44,19 @@ router
   .put(workoutPlansController.updateWorkoutPlan)
   .delete(workoutPlansController.removeWorkoutPlan);
 
-router.post("/:id/workout-plans/add-week", workoutPlansController.addWeek);
-router.post("/:id/workout-plans/add-day", workoutPlansController.addDay);
+router
+  .route("/:id/workout-plans/week")
+  .post(workoutPlansController.addWeek)
+  .put(workoutPlansController.updateWeek);
+
+router
+  .route("/:id/workout-plans/day")
+  .post(workoutPlansController.addDay)
+  .put(workoutPlansController.updateDay);
+
+router
+  .route("/:id/workout-plans/exercise")
+  .post(workoutPlansController.addExercise);
 
 // challenges
 router

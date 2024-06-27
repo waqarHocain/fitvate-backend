@@ -424,6 +424,90 @@ const addWeek = async (req, res) => {
   }
 };
 
+const updateWeek = async (req, res) => {
+  const { id: userId } = req.params;
+  const requestId = generateReqId();
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  const { workoutPlanId, weekId, isCompleted } = req.body;
+  if (!workoutPlanId || !weekId) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing Workout Plan ID / Week ID.",
+    });
+  }
+
+  // check workout plan id is valid
+  const [plan, existingWeek] = await db.$transaction([
+    db.workoutPlan.findUnique({
+      where: {
+        planId: workoutPlanId,
+      },
+    }),
+    db.week.findUnique({
+      where: {
+        weekId,
+      },
+    }),
+  ]);
+
+  if (!plan || !existingWeek) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Workout Plan Id / Week Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  const weekData = {
+    weekId,
+    workoutPlanId,
+  };
+  if (isCompleted) weekData.isCompleted = true;
+
+  try {
+    const week = await db.week.update({
+      where: {
+        weekId,
+      },
+      data: {
+        ...weekData,
+      },
+    });
+
+    return res.json({
+      status: "success",
+      data: {
+        week,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+};
+
 const addDay = async (req, res) => {
   const { id: userId } = req.params;
   const requestId = generateReqId();
@@ -551,11 +635,190 @@ const addDay = async (req, res) => {
   }
 };
 
+const updateDay = async (req, res) => {
+  const { id: userId } = req.params;
+  const requestId = generateReqId();
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  const { weekId, dayId, isCompleted } = req.body;
+  if (!weekId || !dayId) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing Day ID / Week ID.",
+    });
+  }
+
+  // check  week id is valid
+  const [week, existingDay] = await db.$transaction([
+    db.week.findUnique({
+      where: {
+        weekId,
+      },
+    }),
+    db.day.findUnique({
+      where: {
+        dayId,
+      },
+    }),
+  ]);
+
+  if (!week || !existingDay) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Week Id / Day Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  const dayData = {
+    weekId,
+    dayId,
+  };
+  if (isCompleted) dayData.isCompleted = true;
+
+  try {
+    const day = await db.day.update({
+      where: {
+        dayId,
+      },
+      data: {
+        ...dayData,
+      },
+    });
+
+    return res.json({
+      status: "success",
+      data: {
+        day,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+};
+
+const addExercise = async (req, res) => {
+  const { id: userId } = req.params;
+  const requestId = generateReqId();
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  const { exerciseId, dayId, weightUsed, displayIndex, isCompleted } = req.body;
+  if (!exerciseId || !dayId || !weightUsed || !displayIndex) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing required data.",
+    });
+  }
+
+  // check  week id is valid
+  const [existingExercise, day] = await db.$transaction([
+    db.exercise.findUnique({
+      where: {
+        exerciseId,
+      },
+    }),
+    db.day.findUnique({
+      where: {
+        dayId,
+      },
+    }),
+  ]);
+
+  if (!day) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Week Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+  if (existingExercise) {
+    return res.status(409).json({
+      status: "error",
+      code: 409,
+      message: "Already an exercise exists with given exerciseId.",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  const exData = {
+    dayId,
+    exerciseId,
+    weightUsed,
+    displayIndex,
+  };
+  if (isCompleted) exData.isCompleted = true;
+
+  try {
+    const exercise = await db.exercise.create({
+      data: {
+        ...exData,
+      },
+    });
+
+    return res.json({
+      status: "success",
+      data: {
+        exercise,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   getWorkoutPlans,
   addWorkoutPlan,
   removeWorkoutPlan,
   updateWorkoutPlan,
   addWeek,
+  updateWeek,
   addDay,
+  updateDay,
+  addExercise,
 };
