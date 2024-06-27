@@ -361,16 +361,33 @@ const addWeek = async (req, res) => {
   }
 
   // check workout plan id is valid
-  const plan = await db.workoutPlan.findUnique({
-    where: {
-      planId: workoutPlanId,
-    },
-  });
+  const [plan, existingWeek] = await db.$transaction([
+    db.workoutPlan.findUnique({
+      where: {
+        planId: workoutPlanId,
+      },
+    }),
+    db.week.findUnique({
+      where: {
+        weekId,
+      },
+    }),
+  ]);
+
   if (!plan) {
     return res.status(400).json({
       status: "error",
       code: 400,
       message: "Workout Plan Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+  if (existingWeek) {
+    return res.status(409).json({
+      status: "error",
+      code: 409,
+      message: "Already a week exists with given weekId.",
       timestamp: new Date(),
       request_id: requestId,
     });
@@ -383,14 +400,12 @@ const addWeek = async (req, res) => {
   if (isCompleted) weekData.isCompleted = true;
 
   try {
-    console.log({ weekData });
     const week = await db.week.create({
       data: {
         ...weekData,
       },
     });
-    console.log({ week });
-    // TODO: return the appropriate response
+
     return res.json({
       status: "success",
       data: {
@@ -436,11 +451,19 @@ const addDay = async (req, res) => {
   }
 
   // check  week id is valid
-  const week = await db.week.findUnique({
-    where: {
-      weekId,
-    },
-  });
+  const [week, existingDay] = await db.$transaction([
+    db.week.findUnique({
+      where: {
+        weekId,
+      },
+    }),
+    db.day.findUnique({
+      where: {
+        dayId,
+      },
+    }),
+  ]);
+
   if (!week) {
     return res.status(400).json({
       status: "error",
@@ -450,9 +473,19 @@ const addDay = async (req, res) => {
       request_id: requestId,
     });
   }
+  if (existingDay) {
+    return res.status(409).json({
+      status: "error",
+      code: 409,
+      message: "Already a day exists with given dayId.",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
 
   // validate exercise data
   let isValidExercisesData = true;
+
   if (exercises && exercises.length > 0) {
     for (const ex of exercises) {
       if (!ex.exerciseId || !ex.displayIndex || !ex.weightUsed) {
@@ -477,19 +510,28 @@ const addDay = async (req, res) => {
   if (isCompleted) dayData.isCompleted = true;
 
   try {
-    const day = await db.day.create({
-      data: {
-        ...dayData,
-        exercises: {
-          createMany: {
-            data: [...exercises],
+    let day;
+    if (exercises) {
+      day = await db.day.create({
+        data: {
+          ...dayData,
+          exercises: {
+            createMany: {
+              data: [...exercises],
+            },
           },
         },
-      },
-      include: {
-        exercises: true,
-      },
-    });
+        include: {
+          exercises: true,
+        },
+      });
+    } else {
+      day = await db.day.create({
+        data: {
+          ...dayData,
+        },
+      });
+    }
 
     return res.json({
       status: "success",
