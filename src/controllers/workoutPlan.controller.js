@@ -217,6 +217,22 @@ const removeWorkoutPlan = async (req, res) => {
     });
   }
 
+  // check provided plan id is valid
+  const plan = await db.workoutPlan.findUnique({
+    where: {
+      planId: workoutPlanId,
+    },
+  });
+  if (!plan) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Workout Plan Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
   try {
     await db.workoutPlan.delete({
       where: {
