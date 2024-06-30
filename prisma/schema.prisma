@@ -32,19 +32,20 @@ model User {
 }
 
 model WorkoutPlan {
-  id              String  @id @default(uuid())
-  planId          String  @unique
-  planName        String
-  planDescription String?
-  planThemeColor  String?
-  planCategory    String?
-  isPurchased     Boolean @default(true)
-  duration        String?
-  goal            String?
-  planType        String?
-  weeks           Week[]
-  User            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId          String
+  id                   String  @id @default(uuid())
+  planId               String  @unique
+  planName             String
+  planDescription      String?
+  planThemeColor       String?
+  planCategory         String?
+  isPurchased          Boolean @default(true)
+  duration             String?
+  goal                 String?
+  planType             String?
+  completionPercentage String?
+  weeks                Week[]
+  User                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               String
 }
 
 model Week {
@@ -57,10 +58,12 @@ model Week {
 }
 
 model Day {
-  id          String     @id @default(uuid())
-  dayId       String     @unique
-  isCompleted Boolean    @default(false)
-  exercises   Exercise[]
+  id                   String     @id @default(uuid())
+  dayId                String     @unique
+  isCompleted          Boolean    @default(false)
+  isRestDay            Boolean    @default(false)
+  completionPercentage String?
+  exercises            Exercise[]
 
   Week   Week   @relation(fields: [weekId], references: [weekId], onDelete: Cascade)
   weekId String
@@ -71,6 +74,8 @@ model Exercise {
   exerciseId   String  @unique
   displayIndex Int
   weightUsed   String
+  rest         Int?
+  setsAndReps  String?
   isCompleted  Boolean @default(false)
 
   Day   Day    @relation(fields: [dayId], references: [dayId], onDelete: Cascade)
