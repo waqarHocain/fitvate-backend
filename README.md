@@ -215,9 +215,13 @@ Run development server using `npm run dev`.
 - - payload: `{ dayId, weekId, isCompleted }`
 - - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted }}}`
 
-- `[POST] /users/id/workout-plans/exercise`: adds an exercise to an existing day
-- - payload: `{ dayId, exerciseId, weightUsed, displayIndex, isCompleted? }`
-- - response: `{ status: "success", data: { exercise: {id, exerciseId, displayIndex, weightUsed, isCompleted, dayId }}}`
+- `[POST] /users/id/workout-plans/exercise`: adds one or more exercises to an existing day
+- - payload: `{ exercises: [{ dayId, exerciseId, weightUsed, displayIndex, isCompleted?, rest?, setsAndReps?}] }`
+- - response: `{ status: "success", data: { exercises: { count: Int }}}`
+
+- `[DELETE] /users/id/workout-plans/exercise`: deletes an exercise
+- - payload: `{ exerciseId }`
+- - response: `{ status: "success" }`
 
 ### Challenges Progress
 

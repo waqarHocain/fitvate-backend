@@ -56,7 +56,8 @@ router
 
 router
   .route("/:id/workout-plans/exercise")
-  .post(workoutPlansController.addExercise);
+  .post(workoutPlansController.addExercise)
+  .delete(workoutPlansController.removeExercise);
 
 // challenges
 router

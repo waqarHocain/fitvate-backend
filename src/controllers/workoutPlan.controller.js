@@ -750,8 +750,9 @@ const addExercise = async (req, res) => {
     });
   }
 
-  const { exerciseId, dayId, weightUsed, displayIndex, isCompleted } = req.body;
-  if (!exerciseId || !dayId || !weightUsed || !displayIndex) {
+  const { exercises } = req.body;
+  // check for required fields
+  if (!exercises || exercises.length === 0) {
     return res.status(422).json({
       status: "error",
       code: 422,
@@ -760,17 +761,52 @@ const addExercise = async (req, res) => {
       message: "Missing required data.",
     });
   }
+  let isValidData = true;
+  let hasSameDay = true; // dayId is same
+  let dayIdStorage = "";
+  for (const ex of exercises) {
+    const { exerciseId, dayId, weightUsed, displayIndex } = ex;
+    if (!exerciseId || !dayId || !weightUsed || !displayIndex) {
+      isValidData = false;
+      break;
+    }
+    if (dayId !== dayIdStorage && dayIdStorage !== "") {
+      hasSameDay = false;
+    }
+    dayIdStorage = dayId;
+  }
+  if (!isValidData) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing required data.",
+    });
+  }
+  if (!hasSameDay) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      timestamp: new Date(),
+      requestId,
+      message: "Day ID mismatch.",
+    });
+  }
 
   // check  week id is valid
-  const [existingExercise, day] = await db.$transaction([
-    db.exercise.findUnique({
+  const exIds = exercises.map((ex) => ex.exerciseId);
+  const [existingExercises, day] = await db.$transaction([
+    db.exercise.findMany({
       where: {
-        exerciseId,
+        exerciseId: {
+          in: exIds,
+        },
       },
     }),
     db.day.findUnique({
       where: {
-        dayId,
+        dayId: exercises[0].dayId,
       },
     }),
   ]);
@@ -784,7 +820,7 @@ const addExercise = async (req, res) => {
       request_id: requestId,
     });
   }
-  if (existingExercise) {
+  if (existingExercises && existingExercises.length > 0) {
     return res.status(409).json({
       status: "error",
       code: 409,
@@ -794,26 +830,80 @@ const addExercise = async (req, res) => {
     });
   }
 
-  const exData = {
-    dayId,
-    exerciseId,
-    weightUsed,
-    displayIndex,
-  };
-  if (isCompleted) exData.isCompleted = true;
-
   try {
-    const exercise = await db.exercise.create({
-      data: {
-        ...exData,
-      },
+    const newExercises = await db.exercise.createMany({
+      data: [...exercises],
     });
 
     return res.json({
       status: "success",
       data: {
-        exercise,
+        exercises: newExercises,
       },
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+};
+
+const removeExercise = async (req, res) => {
+  const { id: userId } = req.params;
+  const { exerciseId } = req.body;
+
+  const requestId = generateReqId();
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  if (!exerciseId) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing Exercise id",
+    });
+  }
+
+  // check provided exercise id is valid
+  const exercise = await db.exercise.findUnique({
+    where: {
+      exerciseId,
+    },
+  });
+  if (!exercise) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Exercise Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  try {
+    await db.exercise.delete({
+      where: {
+        exerciseId,
+      },
+    });
+
+    return res.json({
+      status: "success",
     });
   } catch (e) {
     console.error(e);
@@ -837,4 +927,5 @@ module.exports = {
   addDay,
   updateDay,
   addExercise,
+  removeExercise,
 };
