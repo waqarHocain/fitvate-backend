@@ -22,7 +22,7 @@
   }
 */
 const isValidWorkoutPlan = (data) => {
-  if (!data.planId || !data.planName) return false;
+  if (!data.planId || !data.planName || !data.duration) return false;
   const { weeks } = data;
 
   const isValid = true;

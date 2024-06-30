@@ -81,6 +81,7 @@ const addWorkoutPlan = async (req, res) => {
   const planData = {
     planId: req.body.planId,
     planName: req.body.planName,
+    duration: req.body.duration,
   };
   if (req.body.planDescription)
     planData.planDescription = req.body.planDescription;
@@ -88,7 +89,6 @@ const addWorkoutPlan = async (req, res) => {
     planData.planThemeColor = req.body.planThemeColor;
   if (req.body.planCategory) planData.planCategory = req.body.planCategory;
   if (req.body.isPurchased) planData.isPurchased = req.body.isPurchased;
-  if (req.body.duration) planData.duration = req.body.duration;
   if (req.body.goal) planData.goal = req.body.goal;
   if (req.body.planType) planData.planType = req.body.planType;
 
