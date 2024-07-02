@@ -1,6 +1,6 @@
 const db = require("../services/db");
 const { generateReqId } = require("../utils/generateReqId");
-const { isValidWorkoutPlan } = require("../utils/validateWorkoutPlanData");
+const { generateWeeksData } = require("../utils/generateWeeksData");
 
 const getWorkoutPlans = async (req, res) => {
   const { id: userId } = req.params;
@@ -67,8 +67,8 @@ const addWorkoutPlan = async (req, res) => {
   }
 
   // check for required fields
-  const isValidData = isValidWorkoutPlan(req.body);
-  if (!isValidData) {
+  const { planId, planName, duration } = req.body;
+  if (!planId || !planName || !duration) {
     return res.status(422).json({
       status: "error",
       code: 422,
@@ -79,9 +79,9 @@ const addWorkoutPlan = async (req, res) => {
   }
 
   const planData = {
-    planId: req.body.planId,
-    planName: req.body.planName,
-    duration: req.body.duration,
+    planId,
+    planName,
+    duration,
   };
   if (req.body.planDescription)
     planData.planDescription = req.body.planDescription;
@@ -92,49 +92,8 @@ const addWorkoutPlan = async (req, res) => {
   if (req.body.goal) planData.goal = req.body.goal;
   if (req.body.planType) planData.planType = req.body.planType;
 
-  const { weeks } = req.body;
-
   // populate weeks data
-  const weeksData = [];
-  weeks.forEach((week) => {
-    const obj = {
-      create: { weekId: week.weekId, days: { connectOrCreate: [] } },
-      where: { weekId: week.weekId },
-    };
-    if (week.isCompleted !== undefined)
-      obj.create.isCompleted = week.isCompleted;
-
-    if (week.days.length > 0) {
-      week.days.forEach((day) => {
-        const dayObj = {
-          where: { dayId: day.dayId },
-          create: { dayId: day.dayId, exercises: { connectOrCreate: [] } },
-        };
-        if (day.isCompleted !== undefined)
-          dayObj.create.isCompleted = day.isCompleted;
-
-        if (day.exercises.length > 0) {
-          day.exercises.forEach((ex) => {
-            const exerciseObj = {
-              create: {
-                exerciseId: ex.exerciseId,
-                weightUsed: ex.weightUsed,
-                displayIndex: parseInt(ex.displayIndex),
-              },
-              where: {
-                exerciseId: ex.exerciseId,
-              },
-            };
-            if (ex.isCompleted !== undefined)
-              exerciseObj.create.isCompleted = ex.isCompleted;
-            dayObj.create.exercises.connectOrCreate.push(exerciseObj);
-          });
-        }
-        obj.create.days.connectOrCreate.push(dayObj);
-      });
-    }
-    weeksData.push(obj);
-  });
+  const weeksData = generateWeeksData(parseInt(duration));
 
   try {
     const existingPlan = await db.workoutPlan.findUnique({
@@ -156,9 +115,6 @@ const addWorkoutPlan = async (req, res) => {
       data: {
         ...planData,
         userId: userId,
-        weeks: {
-          connectOrCreate: [...weeksData],
-        },
       },
       include: {
         weeks: {
@@ -173,10 +129,24 @@ const addWorkoutPlan = async (req, res) => {
       },
     });
 
+    const updatedWeeksData = weeksData.map((wkData) => {
+      return { ...wkData, workoutPlanId: plan.planId };
+    });
+
+    const weeks = await db.$transaction(
+      updatedWeeksData.map((wkData) =>
+        db.week.create({
+          data: { ...wkData },
+          include: { days: { include: { exercises: true } } },
+        })
+      )
+    );
+
     return res.json({
       status: "success",
       data: {
-        plan,
+        ...plan,
+        weeks: [...weeks],
       },
     });
   } catch (e) {
