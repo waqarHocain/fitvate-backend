@@ -355,7 +355,10 @@ const addWeek = async (req, res) => {
     }),
     db.week.findUnique({
       where: {
-        weekId,
+        weekId_workoutPlanId: {
+          weekId: weekId,
+          workoutPlanId: workoutPlanId,
+        },
       },
     }),
   ]);
@@ -445,7 +448,10 @@ const updateWeek = async (req, res) => {
     }),
     db.week.findUnique({
       where: {
-        weekId,
+        weekId_workoutPlanId: {
+          weekId,
+          workoutPlanId,
+        },
       },
     }),
   ]);
@@ -461,15 +467,16 @@ const updateWeek = async (req, res) => {
   }
 
   const weekData = {
-    weekId,
-    workoutPlanId,
+    isCompleted: isCompleted ? true : false,
   };
-  if (isCompleted) weekData.isCompleted = true;
 
   try {
     const week = await db.week.update({
       where: {
-        weekId,
+        weekId_workoutPlanId: {
+          weekId,
+          workoutPlanId,
+        },
       },
       data: {
         ...weekData,
@@ -509,8 +516,16 @@ const addDay = async (req, res) => {
     });
   }
 
-  const { weekId, dayId, isCompleted, exercises } = req.body;
-  if (!weekId || !dayId) {
+  const {
+    workoutPlanId,
+    weekId,
+    dayId,
+    isCompleted,
+    isRestDay,
+    completionPercentage,
+    exercises,
+  } = req.body;
+  if (!workoutPlanId || !weekId || !dayId) {
     return res.status(422).json({
       status: "error",
       code: 422,
@@ -524,12 +539,18 @@ const addDay = async (req, res) => {
   const [week, existingDay] = await db.$transaction([
     db.week.findUnique({
       where: {
-        weekId,
+        weekId_workoutPlanId: {
+          weekId,
+          workoutPlanId,
+        },
       },
     }),
     db.day.findUnique({
       where: {
-        dayId,
+        dayId_weekId: {
+          dayId,
+          weekId,
+        },
       },
     }),
   ]);
@@ -574,10 +595,13 @@ const addDay = async (req, res) => {
   }
 
   const dayData = {
-    weekId,
     dayId,
+    weekId,
+    workoutPlanId,
+    isCompleted: isCompleted ? true : false,
   };
-  if (isCompleted) dayData.isCompleted = true;
+  if (isRestDay) dayData.isRestDay = isRestDay;
+  if (completionPercentage) dayData.completionPercentage = completionPercentage;
 
   try {
     let day;
@@ -636,8 +660,15 @@ const updateDay = async (req, res) => {
     });
   }
 
-  const { weekId, dayId, isCompleted } = req.body;
-  if (!weekId || !dayId) {
+  const {
+    workoutPlanId,
+    weekId,
+    dayId,
+    isCompleted,
+    isRestDay,
+    completionPercentage,
+  } = req.body;
+  if (!workoutPlanId || !weekId || !dayId) {
     return res.status(422).json({
       status: "error",
       code: 422,
@@ -651,12 +682,18 @@ const updateDay = async (req, res) => {
   const [week, existingDay] = await db.$transaction([
     db.week.findUnique({
       where: {
-        weekId,
+        weekId_workoutPlanId: {
+          weekId,
+          workoutPlanId,
+        },
       },
     }),
     db.day.findUnique({
       where: {
-        dayId,
+        dayId_weekId: {
+          dayId,
+          weekId,
+        },
       },
     }),
   ]);
@@ -674,13 +711,19 @@ const updateDay = async (req, res) => {
   const dayData = {
     weekId,
     dayId,
+    workoutPlanId,
   };
   if (isCompleted) dayData.isCompleted = true;
+  if (isRestDay) dayData.isRestDay = true;
+  if (completionPercentage) dayData.completionPercentage = completionPercentage;
 
   try {
     const day = await db.day.update({
       where: {
-        dayId,
+        dayId_weekId: {
+          dayId,
+          weekId,
+        },
       },
       data: {
         ...dayData,
@@ -735,8 +778,8 @@ const addExercise = async (req, res) => {
   let hasSameDay = true; // dayId is same
   let dayIdStorage = "";
   for (const ex of exercises) {
-    const { exerciseId, dayId, weightUsed, displayIndex } = ex;
-    if (!exerciseId || !dayId || !weightUsed || !displayIndex) {
+    const { exerciseId, weekId, dayId, weightUsed, displayIndex } = ex;
+    if (!exerciseId || !dayId || !weekId || !weightUsed || !displayIndex) {
       isValidData = false;
       break;
     }
@@ -776,7 +819,10 @@ const addExercise = async (req, res) => {
     }),
     db.day.findUnique({
       where: {
-        dayId: exercises[0].dayId,
+        dayId_weekId: {
+          dayId: exercises[0].dayId,
+          weekId: exercises[0].weekId,
+        },
       },
     }),
   ]);
@@ -809,6 +855,91 @@ const addExercise = async (req, res) => {
       status: "success",
       data: {
         exercises: newExercises,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+};
+
+const updateExercise = async (req, res) => {
+  const { id: userId } = req.params;
+  const requestId = generateReqId();
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  const {
+    exerciseId,
+    displayIndex,
+    weightUsed,
+    rest,
+    setsAndReps,
+    isCompleted,
+  } = req.body;
+
+  // check for required fields
+  if (!exerciseId) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing required data.",
+    });
+  }
+
+  // check provided exercise id is valid
+  const exercise = await db.exercise.findUnique({
+    where: {
+      exerciseId,
+    },
+  });
+  if (!exercise) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Exercise Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  // populate data
+  const exerciseData = {};
+  if (displayIndex) exerciseData.displayIndex = displayIndex;
+  if (weightUsed) exerciseData.weightUsed = weightUsed;
+  if (setsAndReps) exerciseData.setsAndReps = setsAndReps;
+  if (rest) exerciseData.rest = rest;
+  if (isCompleted) exerciseData.isCompleted = isCompleted;
+
+  try {
+    const updatedExercise = await db.exercise.update({
+      where: {
+        exerciseId,
+      },
+      data: { ...exerciseData },
+    });
+
+    return res.json({
+      status: "success",
+      data: {
+        ...updatedExercise,
       },
     });
   } catch (e) {
@@ -897,5 +1028,6 @@ module.exports = {
   addDay,
   updateDay,
   addExercise,
+  updateExercise,
   removeExercise,
 };

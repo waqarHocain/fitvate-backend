@@ -193,7 +193,7 @@ Run development server using `npm run dev`.
 
 - `[PUT] /users/id/workout-plans`: edit a workout plan,
 - - payload: `{ planId, planName?, planDescription?, planThemeColor?, planThemeColor?, planCategory?, isPurchased?, duration?, goal?, planType? }`
-- - response: returns the updated plan data
+- - response: returns the updated plan data along with weeks and days
 
 - `[DELETE] /users/id/workout-plans`: delete a workout plan,
 - - payload: `{workoutPlanId: str}`
@@ -208,16 +208,20 @@ Run development server using `npm run dev`.
 - - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId } }}`
 
 - `[POST] /users/id/workout-plans/day`: adds a day to an existing week
-- - payload: `{ dayId, weekId, isCompleted?, exercises?: [{exerciseId, weightUsed, displayIndex, isCompleted?}] }`
-- - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted, exercises: [{id, exerciseId, displayIndex, weightUsed, isCompleted, dayId}] } }}`
+- - payload: `{ workoutPlanId, dayId, weekId, isCompleted?, isRestDay?, completionPercentage?, exercises?: [{exerciseId, weightUsed, displayIndex, isCompleted?}] }`
+- - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted, isRestDay, completionPercentage, exercises: [{id, exerciseId, displayIndex, weightUsed, isCompleted, dayId}] } }}`
 
 - `[PUT] /users/id/workout-plans/day`: updates a day
-- - payload: `{ dayId, weekId, isCompleted }`
-- - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted }}}`
+- - payload: `{ workoutPlanId, dayId, weekId, isCompleted?, isRestDay?, completionPercentage? }`
+- - response: `{ status: "success", data: { day: { id, workoutPlanId, dayId, weekId, isCompleted, isRestDay completionPercentage }}}`
 
 - `[POST] /users/id/workout-plans/exercise`: adds one or more exercises to an existing day
-- - payload: `{ exercises: [{ dayId, exerciseId, weightUsed, displayIndex, isCompleted?, rest?, setsAndReps?}] }`
+- - payload: `{ exercises: [{ dayId, weekId, exerciseId, weightUsed, displayIndex, isCompleted?, rest?, setsAndReps?}] }`
 - - response: `{ status: "success", data: { exercises: { count: Int }}}`
+
+- `[PUT] /users/id/workout-plans/exercise`: updates an exercise and returns it
+- - payload: `{ exerciseId, weightUsed?, displayIndex?, isCompleted?, rest?, setsAndReps? }`
+- - response: `{ status: "success", data: { id, exerciseId, weightUsed, displayIndex, isCompleted, rest, setsAndReps, dayId, weekId }}`
 
 - `[DELETE] /users/id/workout-plans/exercise`: deletes an exercise
 - - payload: `{ exerciseId }`
