@@ -49,28 +49,27 @@ model WorkoutPlan {
 }
 
 model Week {
-  id            String      @id @default(uuid())
   weekId        String
   isCompleted   Boolean     @default(false)
   days          Day[]
   WorkoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [planId], onDelete: Cascade)
   workoutPlanId String
 
-  @@unique([weekId, workoutPlanId])
+  @@id([weekId, workoutPlanId])
 }
 
 model Day {
-  id                   String     @id @default(uuid())
   dayId                String
   isCompleted          Boolean    @default(false)
   isRestDay            Boolean    @default(false)
   completionPercentage String?
   exercises            Exercise[]
 
-  Week   Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  weekId String
+  Week          Week   @relation(fields: [weekId, workoutPlanId], references: [weekId, workoutPlanId], onDelete: Cascade)
+  weekId        String
+  workoutPlanId String
 
-  @@unique([dayId, weekId])
+  @@id([dayId, weekId])
 }
 
 model Exercise {
@@ -82,8 +81,9 @@ model Exercise {
   setsAndReps  String?
   isCompleted  Boolean @default(false)
 
-  Day   Day    @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  dayId String
+  Day    Day    @relation(fields: [dayId, weekId], references: [dayId, weekId], onDelete: Cascade)
+  dayId  String
+  weekId String
 }
 
 model Challenge {
