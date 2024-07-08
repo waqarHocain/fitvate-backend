@@ -81,7 +81,7 @@ const addWorkoutPlan = async (req, res) => {
   const planData = {
     planId,
     planName,
-    duration,
+    duration: String(duration),
   };
   if (req.body.planDescription)
     planData.planDescription = req.body.planDescription;
@@ -115,17 +115,6 @@ const addWorkoutPlan = async (req, res) => {
       data: {
         ...planData,
         userId: userId,
-      },
-      include: {
-        weeks: {
-          include: {
-            days: {
-              include: {
-                exercises: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -207,17 +196,6 @@ const removeWorkoutPlan = async (req, res) => {
     await db.workoutPlan.delete({
       where: {
         planId: workoutPlanId,
-      },
-      include: {
-        weeks: {
-          include: {
-            days: {
-              include: {
-                exercises: true,
-              },
-            },
-          },
-        },
       },
     });
 
@@ -385,6 +363,19 @@ const addWeek = async (req, res) => {
   const weekData = {
     weekId,
     workoutPlanId,
+    days: {
+      createMany: {
+        data: [
+          { dayId: "1" },
+          { dayId: "2" },
+          { dayId: "3" },
+          { dayId: "4" },
+          { dayId: "5" },
+          { dayId: "6" },
+          { dayId: "7" },
+        ],
+      },
+    },
   };
   if (isCompleted) weekData.isCompleted = true;
 
@@ -392,6 +383,13 @@ const addWeek = async (req, res) => {
     const week = await db.week.create({
       data: {
         ...weekData,
+      },
+      include: {
+        days: {
+          include: {
+            exercises: true,
+          },
+        },
       },
     });
 
@@ -690,9 +688,10 @@ const updateDay = async (req, res) => {
     }),
     db.day.findUnique({
       where: {
-        dayId_weekId: {
+        dayId_weekId_workoutPlanId: {
           dayId,
           weekId,
+          workoutPlanId,
         },
       },
     }),
@@ -720,9 +719,10 @@ const updateDay = async (req, res) => {
   try {
     const day = await db.day.update({
       where: {
-        dayId_weekId: {
+        dayId_weekId_workoutPlanId: {
           dayId,
           weekId,
+          workoutPlanId,
         },
       },
       data: {
@@ -819,9 +819,10 @@ const addExercise = async (req, res) => {
     }),
     db.day.findUnique({
       where: {
-        dayId_weekId: {
+        dayId_weekId_workoutPlanId: {
           dayId: exercises[0].dayId,
           weekId: exercises[0].weekId,
+          workoutPlanId: exercises[0].workoutPlanId,
         },
       },
     }),

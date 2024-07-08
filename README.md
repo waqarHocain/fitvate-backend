@@ -199,24 +199,24 @@ Run development server using `npm run dev`.
 - - payload: `{workoutPlanId: str}`
 - - response: `{ status: "success" }`
 
-- `[POST] /users/id/workout-plans/week`: adds week to an existing workout plan
+- `[POST] /users/id/workout-plans/week`: adds week to an existing workout plan along with 7 days
 - - payload: `{ workoutPlanId, weekId, isCompleted? }`
-- - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId } }}`
+- - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId, days: [{ ...dayData }] } }}`
 
 - `[PUT] /users/id/workout-plans/week`: updates a week data
 - - payload: `{ workoutPlanId, weekId, isCompleted? }`
 - - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId } }}`
 
-- `[POST] /users/id/workout-plans/day`: adds a day to an existing week
-- - payload: `{ workoutPlanId, dayId, weekId, isCompleted?, isRestDay?, completionPercentage?, exercises?: [{exerciseId, weightUsed, displayIndex, isCompleted?}] }`
-- - response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted, isRestDay, completionPercentage, exercises: [{id, exerciseId, displayIndex, weightUsed, isCompleted, dayId}] } }}`
+- ~~ `[POST] /users/id/workout-plans/day`: adds a day to an existing week ~~
+- - ~~ payload: `{ workoutPlanId, dayId, weekId, isCompleted?, isRestDay?, completionPercentage?, exercises?: [{exerciseId, weightUsed, displayIndex, isCompleted?}] }` ~~
+- - ~~ response: `{ status: "success", data: { day: { id, dayId, weekId, isCompleted, isRestDay, completionPercentage, exercises: [{id, exerciseId, displayIndex, weightUsed, isCompleted, dayId}] } }}` ~~
 
 - `[PUT] /users/id/workout-plans/day`: updates a day
 - - payload: `{ workoutPlanId, dayId, weekId, isCompleted?, isRestDay?, completionPercentage? }`
 - - response: `{ status: "success", data: { day: { id, workoutPlanId, dayId, weekId, isCompleted, isRestDay completionPercentage }}}`
 
 - `[POST] /users/id/workout-plans/exercise`: adds one or more exercises to an existing day
-- - payload: `{ exercises: [{ dayId, weekId, exerciseId, weightUsed, displayIndex, isCompleted?, rest?, setsAndReps?}] }`
+- - payload: `{ exercises: [{ workoutPlanId, dayId, weekId, exerciseId, weightUsed, displayIndex, isCompleted?, rest?, setsAndReps?}] }`
 - - response: `{ status: "success", data: { exercises: { count: Int }}}`
 
 - `[PUT] /users/id/workout-plans/exercise`: updates an exercise and returns it

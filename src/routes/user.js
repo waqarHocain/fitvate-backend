@@ -51,7 +51,7 @@ router
 
 router
   .route("/:id/workout-plans/day")
-  .post(workoutPlansController.addDay)
+  // .post(workoutPlansController.addDay)
   .put(workoutPlansController.updateDay);
 
 router
