@@ -69,7 +69,7 @@ model Day {
   weekId        String
   workoutPlanId String
 
-  @@id([dayId, weekId])
+  @@id([dayId, weekId, workoutPlanId])
 }
 
 model Exercise {
@@ -81,9 +81,10 @@ model Exercise {
   setsAndReps  String?
   isCompleted  Boolean @default(false)
 
-  Day    Day    @relation(fields: [dayId, weekId], references: [dayId, weekId], onDelete: Cascade)
-  dayId  String
-  weekId String
+  Day           Day    @relation(fields: [dayId, weekId, workoutPlanId], references: [dayId, weekId, workoutPlanId], onDelete: Cascade)
+  dayId         String
+  weekId        String
+  workoutPlanId String
 }
 
 model Challenge {
