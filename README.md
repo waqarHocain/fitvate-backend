@@ -220,11 +220,11 @@ Run development server using `npm run dev`.
 - - response: `{ status: "success", data: { exercises: { count: Int }}}`
 
 - `[PUT] /users/id/workout-plans/exercise`: updates an exercise and returns it
-- - payload: `{ exerciseId, weightUsed?, displayIndex?, isCompleted?, rest?, setsAndReps? }`
+- - payload: `{ workoutPlanId, dayId, weekId, exerciseId, weightUsed?, displayIndex?, isCompleted?, rest?, setsAndReps? }`
 - - response: `{ status: "success", data: { id, exerciseId, weightUsed, displayIndex, isCompleted, rest, setsAndReps, dayId, weekId }}`
 
 - `[DELETE] /users/id/workout-plans/exercise`: deletes an exercise
-- - payload: `{ exerciseId }`
+- - payload: `{ exerciseId, workoutPlanId, dayId, weekId, }`
 - - response: `{ status: "success" }`
 
 ### Challenges Progress
