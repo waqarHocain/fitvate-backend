@@ -73,8 +73,7 @@ model Day {
 }
 
 model Exercise {
-  id           String  @id @default(uuid())
-  exerciseId   String  @unique
+  exerciseId   String
   displayIndex Int
   weightUsed   String
   rest         Int?
@@ -85,6 +84,8 @@ model Exercise {
   dayId         String
   weekId        String
   workoutPlanId String
+
+  @@id([exerciseId, dayId, weekId, workoutPlanId])
 }
 
 model Challenge {
