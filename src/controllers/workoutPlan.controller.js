@@ -775,18 +775,26 @@ const addExercise = async (req, res) => {
     });
   }
   let isValidData = true;
-  let hasSameDay = true; // dayId is same
-  let dayIdStorage = "";
   for (const ex of exercises) {
-    const { exerciseId, weekId, dayId, weightUsed, displayIndex } = ex;
-    if (!exerciseId || !dayId || !weekId || !weightUsed || !displayIndex) {
+    const {
+      exerciseId,
+      weekId,
+      dayId,
+      workoutPlanId,
+      weightUsed,
+      displayIndex,
+    } = ex;
+    if (
+      !exerciseId ||
+      !dayId ||
+      !weekId ||
+      !workoutPlanId ||
+      !weightUsed ||
+      !displayIndex
+    ) {
       isValidData = false;
       break;
     }
-    if (dayId !== dayIdStorage && dayIdStorage !== "") {
-      hasSameDay = false;
-    }
-    dayIdStorage = dayId;
   }
   if (!isValidData) {
     return res.status(422).json({
@@ -797,24 +805,22 @@ const addExercise = async (req, res) => {
       message: "Missing required data.",
     });
   }
-  if (!hasSameDay) {
-    return res.status(400).json({
-      status: "error",
-      code: 400,
-      timestamp: new Date(),
-      requestId,
-      message: "Day ID mismatch.",
-    });
-  }
 
-  // check  week id is valid
-  const exIds = exercises.map((ex) => ex.exerciseId);
+  // check  for existing exercises & week id is valid
+  const exData = {
+    exIds: exercises.map((ex) => ex.exerciseId),
+    dayIds: exercises.map((ex) => ex.dayId),
+    weekIds: exercises.map((ex) => ex.weekId),
+    workoutPlanIds: exercises.map((ex) => ex.workoutPlanId),
+  };
+
   const [existingExercises, day] = await db.$transaction([
     db.exercise.findMany({
       where: {
-        exerciseId: {
-          in: exIds,
-        },
+        exerciseId: { in: exData.exIds },
+        dayId: { in: exData.dayIds },
+        weekId: { in: exData.weekIds },
+        workoutPlanId: { in: exData.workoutPlanIds },
       },
     }),
     db.day.findUnique({
@@ -832,7 +838,7 @@ const addExercise = async (req, res) => {
     return res.status(400).json({
       status: "error",
       code: 400,
-      message: "Week Id is invalid",
+      message: "Workout Plan / Week Id is invalid",
       timestamp: new Date(),
       request_id: requestId,
     });
@@ -887,6 +893,9 @@ const updateExercise = async (req, res) => {
 
   const {
     exerciseId,
+    dayId,
+    weekId,
+    workoutPlanId,
     displayIndex,
     weightUsed,
     rest,
@@ -894,21 +903,28 @@ const updateExercise = async (req, res) => {
     isCompleted,
   } = req.body;
 
+  console.log({ exerciseId, dayId, weekId, workoutPlanId });
+
   // check for required fields
-  if (!exerciseId) {
+  if (!exerciseId || !dayId || !weekId || !workoutPlanId) {
     return res.status(422).json({
       status: "error",
       code: 422,
       timestamp: new Date(),
       requestId,
-      message: "Missing required data.",
+      message: "Missing required data, please provide all 4 ids.",
     });
   }
 
   // check provided exercise id is valid
   const exercise = await db.exercise.findUnique({
     where: {
-      exerciseId,
+      exerciseId_dayId_weekId_workoutPlanId: {
+        exerciseId,
+        dayId,
+        weekId,
+        workoutPlanId,
+      },
     },
   });
   if (!exercise) {
@@ -932,7 +948,12 @@ const updateExercise = async (req, res) => {
   try {
     const updatedExercise = await db.exercise.update({
       where: {
-        exerciseId,
+        exerciseId_dayId_weekId_workoutPlanId: {
+          exerciseId,
+          dayId,
+          weekId,
+          workoutPlanId,
+        },
       },
       data: { ...exerciseData },
     });
@@ -957,7 +978,7 @@ const updateExercise = async (req, res) => {
 
 const removeExercise = async (req, res) => {
   const { id: userId } = req.params;
-  const { exerciseId } = req.body;
+  const { exerciseId, dayId, weekId, workoutPlanId } = req.body;
 
   const requestId = generateReqId();
   // only logged in user should be able to update data
@@ -971,7 +992,7 @@ const removeExercise = async (req, res) => {
     });
   }
 
-  if (!exerciseId) {
+  if (!exerciseId || !dayId || !weekId || !workoutPlanId) {
     return res.status(422).json({
       status: "error",
       code: 422,
@@ -984,7 +1005,12 @@ const removeExercise = async (req, res) => {
   // check provided exercise id is valid
   const exercise = await db.exercise.findUnique({
     where: {
-      exerciseId,
+      exerciseId_dayId_weekId_workoutPlanId: {
+        exerciseId,
+        dayId,
+        weekId,
+        workoutPlanId,
+      },
     },
   });
   if (!exercise) {
@@ -1000,7 +1026,12 @@ const removeExercise = async (req, res) => {
   try {
     await db.exercise.delete({
       where: {
-        exerciseId,
+        exerciseId_dayId_weekId_workoutPlanId: {
+          exerciseId,
+          dayId,
+          weekId,
+          workoutPlanId,
+        },
       },
     });
 
