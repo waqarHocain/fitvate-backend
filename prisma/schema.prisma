@@ -49,11 +49,12 @@ model WorkoutPlan {
 }
 
 model Week {
-  weekId        String
-  isCompleted   Boolean     @default(false)
-  days          Day[]
-  WorkoutPlan   WorkoutPlan @relation(fields: [workoutPlanId], references: [planId], onDelete: Cascade)
-  workoutPlanId String
+  weekId               String
+  isCompleted          Boolean     @default(false)
+  completionPercentage String?
+  days                 Day[]
+  WorkoutPlan          WorkoutPlan @relation(fields: [workoutPlanId], references: [planId], onDelete: Cascade)
+  workoutPlanId        String
 
   @@id([weekId, workoutPlanId])
 }
