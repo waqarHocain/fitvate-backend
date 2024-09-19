@@ -666,6 +666,7 @@ const updateDay = async (req, res) => {
     isRestDay,
     completionPercentage,
   } = req.body;
+
   if (!workoutPlanId || !weekId || !dayId) {
     return res.status(422).json({
       status: "error",
@@ -712,8 +713,41 @@ const updateDay = async (req, res) => {
     dayId,
     workoutPlanId,
   };
-  if (isCompleted) dayData.isCompleted = true;
-  if (isRestDay) dayData.isRestDay = true;
+
+  if (isCompleted === true) {
+    dayData.isCompleted = true;
+    // mark that day all exercises as completed
+    try {
+      await db.exercise.updateMany({
+        where: {
+          workoutPlanId: workoutPlanId,
+          weekId: weekId,
+          dayId: dayId,
+        },
+        data: {
+          isCompleted: true,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({
+        status: "error",
+        code: 500,
+        timestamp: new Date(),
+        requestId,
+        message: "Unable to set exercises is completed!",
+      });
+    }
+  } else {
+    dayData.isCompleted = false;
+  }
+
+  if (isRestDay === true) {
+    dayData.isRestDay = true;
+  } else {
+    dayData.isRestDay = false;
+  }
+
   if (completionPercentage) dayData.completionPercentage = completionPercentage;
 
   try {
