@@ -744,6 +744,25 @@ const updateDay = async (req, res) => {
 
   if (isRestDay === true) {
     dayData.isRestDay = true;
+    // delete all exercises for that day
+    try {
+      await db.exercise.deleteMany({
+        where: {
+          workoutPlanId: workoutPlanId,
+          weekId: weekId,
+          dayId: dayId,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({
+        status: "error",
+        code: 500,
+        timestamp: new Date(),
+        requestId,
+        message: "Unable to delete all exercises!",
+      });
+    }
   } else {
     dayData.isRestDay = false;
   }
