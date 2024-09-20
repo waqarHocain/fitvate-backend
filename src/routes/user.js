@@ -49,10 +49,9 @@ router
   .post(workoutPlansController.addWeek)
   .put(workoutPlansController.updateWeek);
 
-router
-  .route("/:id/workout-plans/day")
-  // .post(workoutPlansController.addDay)
-  .put(workoutPlansController.updateDay);
+router.route("/:id/workout-plans/day").put(workoutPlansController.updateDay);
+
+router.post("/:id/workout-plans/day/reset", workoutPlansController.resetDay);
 
 router
   .route("/:id/workout-plans/exercise")

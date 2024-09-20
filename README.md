@@ -215,6 +215,10 @@ Run development server using `npm run dev`.
 - - payload: `{ workoutPlanId, dayId, weekId, isCompleted?, isRestDay?, completionPercentage? }`
 - - response: `{ status: "success", data: { day: { id, workoutPlanId, dayId, weekId, isCompleted, isRestDay completionPercentage }}}`
 
+- `[POST] /users/id/workout-plans/day/reset`: marks day as incomplete, along with all exercises
+- - payload: `{ workoutPlanId, dayId, weekId }`
+- - response: `{ status: "success" }`
+
 - `[POST] /users/id/workout-plans/exercise`: adds one or more exercises to an existing day
 - - payload: `{ exercises: [{ workoutPlanId, dayId, weekId, exerciseId, weightUsed, displayIndex, isCompleted?, rest?, setsAndReps?}] }`
 - - response: `{ status: "success", data: { exercises: { count: Int }}}`

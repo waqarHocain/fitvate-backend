@@ -801,6 +801,96 @@ const updateDay = async (req, res) => {
   }
 };
 
+const resetDay = async (req, res) => {
+  const { id: userId } = req.params;
+  const requestId = generateReqId();
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  const { workoutPlanId, weekId, dayId } = req.body;
+  // check for missing required data
+  if (!workoutPlanId || !weekId || !dayId) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing Day ID / Week ID / WorkoutPlan ID.",
+    });
+  }
+
+  // check provided id is valid
+  const day = await db.day.findUnique({
+    where: {
+      dayId_weekId_workoutPlanId: {
+        dayId,
+        weekId,
+        workoutPlanId,
+      },
+    },
+  });
+  if (!day) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Invalid Day ID.",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  // reset progress data for day and all exercises
+  try {
+    await db.$transaction([
+      db.day.update({
+        where: {
+          dayId_weekId_workoutPlanId: {
+            dayId,
+            weekId,
+            workoutPlanId,
+          },
+        },
+        data: {
+          completionPercentage: "0",
+          isCompleted: false,
+        },
+      }),
+      db.exercise.updateMany({
+        where: {
+          workoutPlanId: workoutPlanId,
+          weekId: weekId,
+          dayId: dayId,
+        },
+        data: {
+          isCompleted: false,
+        },
+      }),
+    ]);
+
+    return res.json({
+      status: "success",
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
 const addExercise = async (req, res) => {
   const { id: userId } = req.params;
   const requestId = generateReqId();
@@ -956,8 +1046,6 @@ const updateExercise = async (req, res) => {
     isCompleted,
   } = req.body;
 
-  console.log({ exerciseId, dayId, weekId, workoutPlanId });
-
   // check for required fields
   if (!exerciseId || !dayId || !weekId || !workoutPlanId) {
     return res.status(422).json({
@@ -1112,6 +1200,7 @@ module.exports = {
   updateWeek,
   addDay,
   updateDay,
+  resetDay,
   addExercise,
   updateExercise,
   removeExercise,
