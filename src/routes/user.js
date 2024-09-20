@@ -44,6 +44,11 @@ router
   .put(workoutPlansController.updateWorkoutPlan)
   .delete(workoutPlansController.removeWorkoutPlan);
 
+router.post(
+  "/:id/workout-plans/reset",
+  workoutPlansController.resetWorkoutPlan
+);
+
 router
   .route("/:id/workout-plans/week")
   .post(workoutPlansController.addWeek)

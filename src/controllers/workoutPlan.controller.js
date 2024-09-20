@@ -298,6 +298,104 @@ const updateWorkoutPlan = async (req, res) => {
   }
 };
 
+const resetWorkoutPlan = async (req, res) => {
+  const { id: userId } = req.params;
+  const requestId = generateReqId();
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  const { planId } = req.body;
+  // check for missing required data
+  if (!planId) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing Workout Plan ID.",
+    });
+  }
+
+  // check planId is valid
+  const plan = await db.workoutPlan.findUnique({
+    where: {
+      planId,
+    },
+  });
+  if (!plan) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Workout Plan Id is invalid",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  try {
+    await db.$transaction([
+      db.workoutPlan.update({
+        where: {
+          planId,
+        },
+        data: {
+          completionPercentage: "0",
+        },
+      }),
+
+      db.week.updateMany({
+        where: {
+          workoutPlanId: planId,
+        },
+        data: {
+          completionPercentage: "0",
+          isCompleted: false,
+        },
+      }),
+
+      db.day.updateMany({
+        where: {
+          workoutPlanId: planId,
+        },
+        data: {
+          completionPercentage: "0",
+          isCompleted: false,
+          isRestDay: false,
+        },
+      }),
+
+      db.exercise.updateMany({
+        where: { workoutPlanId: planId },
+        data: {
+          isCompleted: false,
+        },
+      }),
+    ]);
+
+    return res.json({
+      status: "success",
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+};
+
 const addWeek = async (req, res) => {
   const { id: userId } = req.params;
   const requestId = generateReqId();
@@ -1196,6 +1294,7 @@ module.exports = {
   addWorkoutPlan,
   removeWorkoutPlan,
   updateWorkoutPlan,
+  resetWorkoutPlan,
   addWeek,
   updateWeek,
   addDay,

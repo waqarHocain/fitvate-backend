@@ -199,6 +199,10 @@ Run development server using `npm run dev`.
 - - payload: `{workoutPlanId: str}`
 - - response: `{ status: "success" }`
 
+- `[POST] /users/id/workout-plans/reset`: reset a plan along with all weeks, days and exercises
+- - payload: `{ planId }`
+- - response: `{ status: "success" }`
+
 - `[POST] /users/id/workout-plans/week`: adds week to an existing workout plan along with 7 days
 - - payload: `{ workoutPlanId, weekId, isCompleted? }`
 - - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId, days: [{ ...dayData }] } }}`
