@@ -203,6 +203,10 @@ Run development server using `npm run dev`.
 - - payload: `{ planId }`
 - - response: `{ status: "success" }`
 
+- `[POST] /users/id/workout-plans/pre-made`: creates a pre-made plan,
+- - payload: same as workout plan create, along with all the weeks, days and exercises data
+- - response: `{ status: "success" }`
+
 - `[POST] /users/id/workout-plans/week`: adds week to an existing workout plan along with 7 days
 - - payload: `{ workoutPlanId, weekId, isCompleted? }`
 - - response: `{ status: "success", data: { week: { id, weekId, isCompleted, workoutPlanId, days: [{ ...dayData }] } }}`
