@@ -91,6 +91,8 @@ const addWorkoutPlan = async (req, res) => {
   if (req.body.isPurchased) planData.isPurchased = req.body.isPurchased;
   if (req.body.goal) planData.goal = req.body.goal;
   if (req.body.planType) planData.planType = req.body.planType;
+  if (req.body.completionPercentage)
+    planData.completionPercentage = req.body.completionPercentage;
 
   // populate weeks data
   const weeksData = generateWeeksData(parseInt(duration));
@@ -253,6 +255,8 @@ const updateWorkoutPlan = async (req, res) => {
   if (req.body.duration) planData.duration = req.body.duration;
   if (req.body.goal) planData.goal = req.body.goal;
   if (req.body.planType) planData.planType = req.body.planType;
+  if (req.body.completionPercentage)
+    planData.completionPercentage = req.body.completionPercentage;
 
   // make sure that planId is valid
   const plan = await db.workoutPlan.findUnique({
@@ -394,6 +398,163 @@ const resetWorkoutPlan = async (req, res) => {
       message: "Internal server error",
     });
   }
+};
+
+const createPreMadePlan = async (req, res) => {
+  const requestId = generateReqId();
+  const { id: userId } = req.params;
+
+  // only logged in user should be able to update data
+  if (userId !== req.user.id) {
+    return res.status(403).json({
+      status: "error",
+      code: 403,
+      timestamp: new Date(),
+      requestId,
+      message: "Forbidden",
+    });
+  }
+
+  // check for required fields
+  const { planId, planName, duration, weeks } = req.body;
+  if (!planId || !planName || !duration) {
+    return res.status(422).json({
+      status: "error",
+      code: 422,
+      timestamp: new Date(),
+      requestId,
+      message: "Missing workout plan data",
+    });
+  }
+
+  const planData = {
+    planId,
+    planName,
+    duration: String(duration),
+    userId,
+  };
+
+  if (req.body.planDescription)
+    planData.planDescription = req.body.planDescription;
+  if (req.body.planThemeColor)
+    planData.planThemeColor = req.body.planThemeColor;
+  if (req.body.planCategory) planData.planCategory = req.body.planCategory;
+  if (req.body.isPurchased) planData.isPurchased = req.body.isPurchased;
+  if (req.body.goal) planData.goal = req.body.goal;
+  if (req.body.planType) planData.planType = req.body.planType;
+  if (req.body.completionPercentage)
+    planData.completionPercentage = req.body.completionPercentage;
+
+  // validate and gather the data
+  const weeksData = [];
+  const daysData = [];
+  const exercisesData = [];
+  let isValid = true;
+
+  for (const week of weeks) {
+    const weekData = {};
+
+    if (!week.weekId) {
+      isValid = false;
+      break;
+    }
+    weekData.weekId = week.weekId;
+    weekData.workoutPlanId = planId;
+
+    if (week.completionPercentage)
+      weekData.completionPercentage = week.completionPercentage;
+    if (week.isCompleted) weekData.isCompleted = week.isCompleted;
+
+    const { days } = week;
+
+    for (const day of days) {
+      const dayData = {};
+      if (!day.dayId) {
+        isValid = false;
+        break;
+      }
+
+      dayData.dayId = day.dayId;
+      dayData.workoutPlanId = planId;
+      dayData.weekId = week.weekId;
+
+      if (day.isCompleted) dayData.isCompleted = day.isCompleted;
+      if (day.isRestDay) dayData.isRestDay = day.isRestDay;
+      if (day.completionPercentage)
+        dayData.completionPercentage = day.completionPercentage;
+
+      const { exercises } = day;
+
+      for (const ex of exercises) {
+        const exData = {};
+
+        if (!ex.exerciseId || !ex.displayIndex || !ex.weightUsed) {
+          isValid = false;
+          break;
+        }
+
+        exData.exerciseId = ex.exerciseId;
+        exData.dayId = day.dayId;
+        exData.weekId = week.weekId;
+        exData.workoutPlanId = planId;
+
+        exData.displayIndex = parseInt(ex.displayIndex);
+        exData.weightUsed = ex.weightUsed;
+
+        if (ex.rest) exData.rest = ex.rest;
+        if (ex.setsAndReps) exData.setsAndReps = ex.setsAndReps;
+        if (ex.isCompleted) exData.isCompleted = ex.isCompleted;
+
+        exercisesData.push(exData);
+      }
+
+      daysData.push(dayData);
+    }
+
+    weeksData.push(weekData);
+  }
+
+  if (!isValid) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Missing data.",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+  }
+
+  console.log({ planData });
+
+  try {
+    await db.$transaction([
+      db.workoutPlan.create({
+        data: planData,
+      }),
+      db.week.createMany({
+        data: weeksData,
+      }),
+      db.day.createMany({
+        data: daysData,
+      }),
+      db.exercise.createMany({
+        data: exercisesData,
+      }),
+    ]);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      status: "error",
+      code: 500,
+      timestamp: new Date(),
+      requestId,
+      message: "Internal server error",
+    });
+  }
+
+  return res.json({
+    status: "success",
+  });
 };
 
 const addWeek = async (req, res) => {
@@ -1295,6 +1456,7 @@ module.exports = {
   removeWorkoutPlan,
   updateWorkoutPlan,
   resetWorkoutPlan,
+  createPreMadePlan,
   addWeek,
   updateWeek,
   addDay,

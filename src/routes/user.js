@@ -44,6 +44,12 @@ router
   .put(workoutPlansController.updateWorkoutPlan)
   .delete(workoutPlansController.removeWorkoutPlan);
 
+// pre-made workout plan
+router.post(
+  "/:id/workout-plans/pre-made",
+  workoutPlansController.createPreMadePlan
+);
+
 router.post(
   "/:id/workout-plans/reset",
   workoutPlansController.resetWorkoutPlan
