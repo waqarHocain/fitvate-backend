@@ -427,6 +427,23 @@ const createPreMadePlan = async (req, res) => {
     });
   }
 
+  // check for existing plan with same id
+  const palnExists = await db.workoutPlan.findUnique({
+    where: {
+      planId,
+    }
+  })
+  if (palnExists) {
+    return res.status(409).json({
+      status: "error",
+      code: 409,
+      message: "Already a plan exists with given id.",
+      timestamp: new Date(),
+      request_id: requestId,
+    });
+
+  }
+
   const planData = {
     planId,
     planName,
@@ -501,7 +518,7 @@ const createPreMadePlan = async (req, res) => {
         exData.displayIndex = parseInt(ex.displayIndex);
         exData.weightUsed = ex.weightUsed;
 
-        if (ex.rest) exData.rest = ex.rest;
+        if (ex.rest) exData.rest = parseInt(ex.rest);
         if (ex.setsAndReps) exData.setsAndReps = ex.setsAndReps;
         if (ex.isCompleted) exData.isCompleted = ex.isCompleted;
 
@@ -523,8 +540,6 @@ const createPreMadePlan = async (req, res) => {
       request_id: requestId,
     });
   }
-
-  console.log({ planData });
 
   try {
     await db.$transaction([
