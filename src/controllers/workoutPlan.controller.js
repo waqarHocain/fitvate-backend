@@ -431,8 +431,8 @@ const createPreMadePlan = async (req, res) => {
   const palnExists = await db.workoutPlan.findUnique({
     where: {
       planId,
-    }
-  })
+    },
+  });
   if (palnExists) {
     return res.status(409).json({
       status: "error",
@@ -441,7 +441,6 @@ const createPreMadePlan = async (req, res) => {
       timestamp: new Date(),
       request_id: requestId,
     });
-
   }
 
   const planData = {
@@ -700,7 +699,7 @@ const updateWeek = async (req, res) => {
     });
   }
 
-  const { workoutPlanId, weekId, isCompleted } = req.body;
+  const { workoutPlanId, weekId, isCompleted, completionPercentage } = req.body;
   if (!workoutPlanId || !weekId) {
     return res.status(422).json({
       status: "error",
@@ -741,6 +740,8 @@ const updateWeek = async (req, res) => {
   const weekData = {
     isCompleted: isCompleted ? true : false,
   };
+  if (completionPercentage)
+    weekData.completionPercentage = completionPercentage;
 
   try {
     const week = await db.week.update({
