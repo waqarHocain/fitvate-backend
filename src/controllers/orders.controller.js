@@ -88,7 +88,7 @@ const addOrder = async (req, res) => {
   try {
     // setup
     const packageName = process.env.PACKAGE_NAME;
-    const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${packageName}/purchases/products/${purchase.productId}/tokens/${purchase.purchaseToken}`;
+    const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${packageName}/purchases/products/${productId}/tokens/${purchaseToken}`;
     let resJson;
     try {
       const response = await fetch(url);
